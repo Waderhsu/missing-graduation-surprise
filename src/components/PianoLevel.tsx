@@ -40,11 +40,14 @@ export function PianoLevel({ onSuccess }: PianoLevelProps) {
 
   return (
     <div className="space-y-6">
-      <LevelHeader title="315 練琴室 — 無聲的旋律" />
+      <LevelHeader title="神秘的旋律" />
 
       <p className="text-slate-300 leading-relaxed text-base">
-        推開 315 練琴室的門，裡面空無一人，只有一架靜靜佇立的鋼琴。譜架上放著一張樂譜，樂譜上有一串神秘的數字 1 - 1 - 5 - 5 - 6 - 6 - 5 。你必須解開這些線索，才能獲取最後的寶物。
+        循著鏡中的線索來到 315 練琴室，裡面空無一人，只有一架靜靜佇立的鋼琴。走近一看，譜架上放著一張樂譜，上面有一串神秘的數字：「1 - 1 - 5 - 5 - 6 - 6 - 5」。
       </p>
+      <blockquote className="border-l-2 border-amber-600/50 pl-4 py-2 bg-amber-950/10 rounded-r text-sm text-amber-200/90 italic">
+        用最純粹的琴音喚醒那首我們都曾唱過的旋律吧！
+      </blockquote>
       <ImagePlaceholder src={LEVEL_IMAGES.sheetMusic} alt="鋼琴樂譜" />
 
       <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl max-w-lg mx-auto space-y-3">

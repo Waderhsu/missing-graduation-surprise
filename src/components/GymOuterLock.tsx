@@ -32,20 +32,20 @@ export function GymOuterLock({ onSuccess }: GymOuterLockProps) {
 
   return (
     <div className="space-y-6">
-      <LevelHeader title="體育館大門 — 進擊的最終外鎖" />
+      <LevelHeader title="數字的重組" />
 
       <p className="text-stone-300 leading-relaxed text-base">
         你氣喘吁吁地來到體育館大門，卻發現門是緊鎖的。嫌犯果然不會讓我們這麼輕易破關！這時，你看到實體鎖頭旁邊貼著一張精緻的密碼提示卡，上面寫著三道奇怪的數學謎題：
       </p>
 
+      <blockquote className="border-l-2 border-amber-600/50 pl-4 py-2 bg-amber-950/10 rounded-r text-sm text-amber-200/90 italic">
+        「把文字當成積木，轉個彎、疊在一起、排排站，答案就在形狀裡。」
+      </blockquote>
+
       <ImagePlaceholder
         src={LEVEL_IMAGES.gymOuterLock}
         alt="體育館大門密碼提示卡"
       />
-
-      <div className="bg-stone-950/60 border border-stone-800 rounded-2xl p-5 space-y-4">
-        <p className="text-xs text-stone-500 italic text-center">提示：這是考驗文字結構與空間重組的幾何題，請依序解出密碼。</p>
-      </div>
 
       <form onSubmit={handleSubmit} className="max-w-sm mx-auto space-y-4 bg-stone-900 border border-stone-800 p-5 rounded-2xl">
         <span className="text-xs font-mono text-stone-500 uppercase tracking-widest block text-center">🔐 輸入密碼</span>

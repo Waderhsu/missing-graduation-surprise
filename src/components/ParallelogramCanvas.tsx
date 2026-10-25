@@ -31,22 +31,22 @@ function getStageConfig(stage: number): StageConfig {
       return {
         sliderRail: 'top',
         targetX: 60,
-        description: '在上方黑線移動紅點，完成圖形。',
+        description: '移動紅點，完成圖形，解鎖平板',
       };
     case 2:
       return {
         sliderRail: 'bottom',
         targetX: 35,
-        description: '在下方黑線移動紅點，完成圖形。',
+        description: '移動紅點，完成圖形，解鎖平板',
       };
     case 3:
       return {
         sliderRail: 'bottom',
         targetX: 10,
-        description: '最後一步：在下方黑線移動紅點，完成第三個圖形。',
+        description: '移動紅點，完成圖形，解鎖平板',
       };
     default:
-      return { sliderRail: 'none', targetX: -999, description: '恭喜！解鎖成功！解開平板上的「完美六星圖騰」。',};
+      return { sliderRail: 'none', targetX: -999, description: '恭喜！解鎖成功！解開平板上的「完美六星圖騰」。' };
   }
 }
 
@@ -113,6 +113,7 @@ export function ParallelogramCanvas({ onSuccess }: ParallelogramCanvasProps) {
     }
   };
 
+  /** Active stage dots stay bright; prior completed corners stay faintly visible. */
   const blueDots =
     stage === 1
       ? [P1, P2, P3]
@@ -121,6 +122,12 @@ export function ParallelogramCanvas({ onSuccess }: ParallelogramCanvasProps) {
         : stage === 3
           ? [P1, P4, P5]
           : [];
+  const faintDots =
+    stage === 2
+      ? [P3]
+      : stage === 3
+        ? [P2, P3]
+        : [];
 
   const sliderY = config.sliderRail === 'top' ? TOP_Y : BOTTOM_Y;
   const slider = { x: sliderX, y: sliderY };
@@ -162,10 +169,10 @@ export function ParallelogramCanvas({ onSuccess }: ParallelogramCanvasProps) {
 
   return (
     <div className="space-y-6">
-      <LevelHeader title="嫌犯的平板 — 拼湊完美的圖騰" />
+      <LevelHeader title="拼湊完美的圖騰" />
 
       <div className="bg-[#1c1917]/25 border border-stone-850 p-4.5 rounded-2xl text-stone-300 space-y-3 text-base leading-relaxed">
-        <p>打開保險箱後，裡面沒有原本期待的畢業驚喜，只有一個牛皮紙信封。裡面有一張縮小版校園平面圖，以及一台畫面鎖定的平板，平板螢幕上閃爍著解鎖提示：「完美的平衡，建立在相對的彼端長度如出一轍。」</p>
+        <p>打開保險箱後，裡面沒有原本期待的畢業驚喜，只有一個牛皮紙信封。裡面有一張縮小版校園平面圖，以及一台畫面鎖定的平板，平板螢幕上閃爍著解鎖提示：「完美的平衡，建立在相對的彼端長度如出一轍，且軌跡互不交錯。」</p>
         <p className="border-l-2 border-red-600/50 pl-3 py-1 bg-red-950/10 rounded text-red-300 font-serif italic text-sm">
           信封上用紅筆寫著：「我是世界上最完美的人哈哈哈，你們是找不到我的！我將線索留在了校園的四個角落。只有解鎖平板找到線索，通往終點的大門才會為你們敞開。」
         </p>
@@ -221,6 +228,13 @@ export function ParallelogramCanvas({ onSuccess }: ParallelogramCanvasProps) {
           )}
 
           {stage < 4 &&
+            faintDots.map((dot, i) => (
+              <div key={`faint-${i}`} className="absolute w-5 h-5 rounded-full bg-sky-500/25 border border-sky-300/40 flex items-center justify-center -translate-x-1/2 -translate-y-1/2 pointer-events-none z-[9]" style={{ left: `${dot.x}%`, top: `${dot.y}%` }}>
+                <div className="w-1.5 h-1.5 rounded-full bg-slate-900/40" />
+              </div>
+            ))}
+
+          {stage < 4 &&
             blueDots.map((dot, i) => (
               <div key={i} className="absolute w-5 h-5 rounded-full bg-sky-500 border-2 border-white flex items-center justify-center -translate-x-1/2 -translate-y-1/2 shadow-lg shadow-sky-500/40 pointer-events-none z-10" style={{ left: `${dot.x}%`, top: `${dot.y}%` }}>
                 <div className="w-1.5 h-1.5 rounded-full bg-slate-900" />
@@ -252,7 +266,7 @@ export function ParallelogramCanvas({ onSuccess }: ParallelogramCanvasProps) {
                     className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
                     style={{ left: `${dot.x}%`, top: `${dot.y}%` }}
                   >
-                    <span className="text-3xl text-amber-400 drop-shadow-[0_0_12px_rgba(245,158,11,0.9)] animate-pulse">⭐</span>
+                    <span className="text-5xl text-amber-300 drop-shadow-[0_0_20px_rgba(251,191,36,1)] animate-pulse">⭐</span>
                   </motion.div>
                 ))}
                 </div>

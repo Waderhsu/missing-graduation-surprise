@@ -67,7 +67,7 @@ export function DormClockLevel({ onSuccess }: DormClockLevelProps) {
 
   return (
     <div className="space-y-6">
-      <LevelHeader title="宿舍大門 — 那些奮鬥的日子" />
+      <LevelHeader title="辛苦的時刻" />
 
       <div className="bg-stone-900 border border-stone-800 p-4 rounded-xl text-stone-300 text-[15px] space-y-2 leading-relaxed">
         <p className="font-bold border-b border-stone-800 pb-1.5 flex items-center gap-1.5 text-stone-200 not-italic">
@@ -75,12 +75,13 @@ export function DormClockLevel({ onSuccess }: DormClockLevelProps) {
         </p>
         <p>一路狂奔來到宿舍，你卻發現大門緊閉。是啊，會考剛考完，大家都回家了。站在熟悉的門前，你突然想起會考前那段奮鬥的日子：</p>
         <p>
-          每天清晨 <b>6:00</b> 痛苦地揉著眼睛起床；中午 <b>12:00</b> 剛吃飽好睏還要打起精神；下午 <b>15:00（3點）</b> 靠著意志力撐過最想睡的午後；直到晚上 <b>21:00（9點）</b> 梳洗後開始夜自習，才拖著疲憊的身體走回這扇門前。
+          每天清晨 <b>6:00</b> 痛苦地揉著眼睛起床；中午 <b>12:00</b> 剛吃飽好睏還要打起精神；下午 <b>3:00</b> 靠著意志力撐過最想睡的午後；直到晚上 <b>9:00</b> 梳洗後開始夜自習，才拖著疲憊的身體走回這扇門前。
         </p>
+        <p>那真是一段令人難以忘記的考前時光啊……</p>
       </div>
 
       <blockquote className="border-l-2 border-amber-600/50 pl-4 py-2 bg-amber-950/10 rounded-r text-sm text-amber-200/90 italic">
-        「九年級的每一天，時間總推著我們往固定的方向前進。回憶你最深刻的四個時刻，時針的指向將帶你回家。」
+        「九年級的每一天，時間總推著我們往固定的方向前進。回憶你最深刻的四個時刻，指針的指向將帶你到下一個地方。」
       </blockquote>
 
       <ImagePlaceholder

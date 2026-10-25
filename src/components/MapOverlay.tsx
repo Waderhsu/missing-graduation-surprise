@@ -155,11 +155,14 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
 
   return (
     <div className="space-y-5">
-      <LevelHeader title="星芒的指引 — 疊合的真相" />
+      <LevelHeader title="疊合的真相" />
 
       <p className="text-stone-300 text-sm leading-relaxed">
-        平板定格為六顆星芒，手邊的紙地圖上也印著星星。將紙地圖疊加在螢幕上並旋轉，直到兩者星標重合，剩下的線索就會浮現。
+        你盯著平板上的六顆星，再低頭看看手邊的實體校園地圖，突然發現：地圖上竟然也印著兩顆星星標記！一顆在剛才潛入的「警衛室」，另一顆就在現在所處的「中學樓」（九導辦公室）。
       </p>
+      <blockquote className="border-l-2 border-amber-600/50 pl-4 py-2 bg-amber-950/10 rounded-r text-sm text-amber-200/90 italic">
+        如果這兩顆星代表已經破解的地方，那麼平板上剩下的四顆星，一定就是嫌犯藏匿線索的地點！
+      </blockquote>
 
       <div className="flex flex-col items-center gap-3">
         <span className="text-xs text-stone-400 text-center">

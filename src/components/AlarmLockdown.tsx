@@ -82,7 +82,7 @@ export function AlarmLockdown({ onSuccess, onFailure }: AlarmLockdownProps) {
   return (
     <div className="space-y-5">
       <div className="flex items-start justify-between gap-3 border-b border-red-900/30 pb-3">
-        <LevelHeader title="警報中斷程序" className="border-none pb-0 flex-1" />
+        <LevelHeader title="中斷警報" className="border-none pb-0 flex-1" />
         <button
           type="button"
           onClick={() => setAlarmOn(!alarmOn)}
@@ -126,11 +126,13 @@ export function AlarmLockdown({ onSuccess, onFailure }: AlarmLockdownProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
         <div className="bg-[#0a0f0d] border border-[#22c55e]/25 rounded-xl p-4 sm:p-5 font-mono space-y-4 shadow-inner">
           <div className="text-[#22c55e] text-center space-y-3">
-            <p className="text-sm font-bold border-b border-[#22c55e]/25 pb-2 tracking-wide">校內警報閥閉系統</p>
             <div className="text-xl sm:text-2xl font-bold tracking-widest">? ? 10 17 26 ?? 50</div>
           </div>
           <p className="text-[11px] sm:text-xs leading-relaxed text-stone-400 text-center bg-stone-950/60 border border-stone-800 rounded-lg p-3">
             「目前的干擾頻率為非穩定狀態，請找出缺失的頻率數值與關鍵頻率的位置，並轉化為代碼中斷警報。」
+          </p>
+          <p className="text-[11px] sm:text-xs leading-relaxed text-amber-200/80 text-left bg-amber-950/20 border border-amber-700/30 rounded-lg p-3">
+            ⚠️系統警告：本機無法讀取超出對照表上限的未知頻率，若遇超載數值，請將其拆解為獨立的單一訊號，再逐一進行轉譯。
           </p>
         </div>
 
@@ -147,9 +149,9 @@ export function AlarmLockdown({ onSuccess, onFailure }: AlarmLockdownProps) {
               <input
                 type="text"
                 value={answer}
-                onChange={(e) => { setError(''); setAnswer(e.target.value); }}
+                onChange={(e) => { setError(''); setAnswer(e.target.value.toUpperCase()); }}
                 maxLength={10}
-                placeholder="四個字母..."
+                placeholder="----"
                 autoComplete="off"
                 className="w-full pl-12 pr-4 py-3.5 border border-stone-700 bg-stone-900 font-mono tracking-[0.35em] text-[#22c55e] rounded-lg focus:border-red-500 outline-none text-center text-lg uppercase font-bold"
               />

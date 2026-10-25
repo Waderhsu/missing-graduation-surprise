@@ -23,8 +23,52 @@ import { BannerBlessingLevel } from "./components/BannerBlessingLevel";
 import { FinalPerfectLock } from "./components/FinalPerfectLock";
 import { GymOuterLock } from "./components/GymOuterLock";
 import { LocationChoiceScreen } from "./components/LocationChoiceScreen";
+import { ItemUnlockDialog } from "./components/ItemUnlockDialog";
 import { LEVEL_IMAGES } from "./levelAssets";
 import { getLevelBgm } from "./levelBgm";
+
+const INITIAL_STATE: GameState = {
+  currentLevelId: "intro",
+  unlockedLevels: ["intro", "loc_gate"],
+  isAlarmActive: false,
+  alarmTimeLeft: 300,
+  dormGateSequence: [],
+  dormLoungeSolved: false,
+  horcruxSolved: { dorm: false, art: false, primary: false },
+  hasCookie: false,
+  hasStarCard: false,
+  hasDiary: false,
+  hasBanner: false,
+  currentDormGateInputs: [],
+  completedLevels: ["intro"],
+};
+
+type ItemDialogState = {
+  title: string;
+  icon: string;
+  description?: string;
+  nextLevelId: string;
+} | null;
+
+function normalizeSavedState(parsed: Record<string, unknown>): GameState {
+  const { hasPalette: _removed, ...rest } = parsed as Record<string, unknown> & { hasPalette?: boolean };
+  return {
+    ...INITIAL_STATE,
+    ...(rest as Partial<GameState>),
+    hasCookie: Boolean(rest.hasCookie),
+    hasStarCard: Boolean(rest.hasStarCard),
+    hasDiary: Boolean(rest.hasDiary),
+    hasBanner: Boolean(rest.hasBanner),
+    horcruxSolved: {
+      dorm: Boolean((rest.horcruxSolved as GameState["horcruxSolved"] | undefined)?.dorm),
+      art: Boolean((rest.horcruxSolved as GameState["horcruxSolved"] | undefined)?.art),
+      primary: Boolean((rest.horcruxSolved as GameState["horcruxSolved"] | undefined)?.primary),
+    },
+    unlockedLevels: Array.isArray(rest.unlockedLevels) ? (rest.unlockedLevels as string[]) : INITIAL_STATE.unlockedLevels,
+    completedLevels: Array.isArray(rest.completedLevels) ? (rest.completedLevels as string[]) : INITIAL_STATE.completedLevels,
+    currentLevelId: typeof rest.currentLevelId === "string" ? rest.currentLevelId : "intro",
+  };
+}
 
 export default function App() {
   const LOCAL_STORAGE_KEY = "消失的畢業驚喜_STATE_V1";
@@ -35,27 +79,13 @@ export default function App() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed.currentLevelId === "string") {
-          return parsed;
+          return normalizeSavedState(parsed);
         }
       }
     } catch (e) {
       console.warn("Storage restoration failed:", e);
     }
-
-    return {
-      currentLevelId: "intro",
-      unlockedLevels: ["intro", "loc_gate"],
-      isAlarmActive: false,
-      alarmTimeLeft: 300,
-      dormGateSequence: [],
-      dormLoungeSolved: false,
-      horcruxSolved: { dorm: false, art: false, primary: false },
-      hasCookie: false,
-      hasPalette: false,
-      hasStarCard: false,
-      currentDormGateInputs: [],
-      completedLevels: ["intro"],
-    };
+    return { ...INITIAL_STATE };
   });
 
   useEffect(() => {
@@ -77,6 +107,8 @@ export default function App() {
   const navGenerationRef = useRef(0);
   const [intermissionChoiceError, setIntermissionChoiceError] = useState<string>("");
   const [intermissionSuccess, setIntermissionSuccess] = useState<string>("");
+  const [itemDialog, setItemDialog] = useState<ItemDialogState>(null);
+  const [finishStep, setFinishStep] = useState(1);
 
   const cancelPendingNavigation = () => {
     navGenerationRef.current += 1;
@@ -100,6 +132,7 @@ export default function App() {
     cancelPendingNavigation();
     setIntermissionChoiceError("");
     setIntermissionSuccess("");
+    if (state.currentLevelId === "finish") setFinishStep(1);
   }, [state.currentLevelId]);
 
   useEffect(() => {
@@ -201,22 +234,11 @@ export default function App() {
     audioEngine.playBeep(300, 0.2);
     cancelPendingNavigation();
     localStorage.removeItem(LOCAL_STORAGE_KEY);
-    setState({
-      currentLevelId: "intro",
-      unlockedLevels: ["intro", "loc_gate"],
-      isAlarmActive: false,
-      alarmTimeLeft: 300,
-      dormGateSequence: [],
-      dormLoungeSolved: false,
-      horcruxSolved: { dorm: false, art: false, primary: false },
-      hasCookie: false,
-      hasPalette: false,
-      hasStarCard: false,
-      currentDormGateInputs: [],
-      completedLevels: ["intro"],
-    });
+    setState({ ...INITIAL_STATE });
     setConfettiActive(false);
     setShowResetConfirm(false);
+    setItemDialog(null);
+    setFinishStep(1);
   };
 
   const handleResetGame = () => {
@@ -275,7 +297,7 @@ export default function App() {
       setIntermissionSuccess("✅ 聰明的選擇。請立刻前往宿舍，跑起來吧！");
       scheduleAdvance("loc_dorm_gate", 1200);
     } else {
-      setIntermissionChoiceError("❌ 嗶！你太讓我失望了，我不是說了我討厭這裡嗎？請重新閱讀我的詩！");
+      setIntermissionChoiceError("❌ 「嗶！別想隨便亂闖，完美的遊戲必須按部就班。請重新解讀詩裡的線索！」");
       audioEngine.playBeep(180, 0.3);
     }
   };
@@ -284,11 +306,14 @@ export default function App() {
     setState((prev) => ({
       ...prev,
       hasCookie: true,
-      hasPalette: true,
-      hasStarCard: true,
       horcruxSolved: { ...prev.horcruxSolved, dorm: true },
     }));
-    advanceToLevel("loc_intermission2");
+    setItemDialog({
+      title: "解鎖成功！獲得一塊溫熱的餅乾",
+      icon: "🍪",
+      description: "已自動存入探險背包。",
+      nextLevelId: "loc_intermission2",
+    });
   };
 
   const handleIntermission2Select = (choice: string) => {
@@ -299,13 +324,23 @@ export default function App() {
       audioEngine.playBeep(880, 0.2);
       setIntermissionSuccess("✅ 算你們有點眼光。帶著那半張殘破的星夜，前往藝文館一樓吧！");
       scheduleAdvance("loc_art_mirror", 2000);
-    } else if (choice === "體育館") {
-      setIntermissionChoiceError("❌ 難道那塊餅乾堵住了你們的觀察力？梵谷可不會在操場上揮灑顏料！請看清楚手上的線索，再選一次！");
-      audioEngine.playBeep(180, 0.3);
-    } else if (choice === "小學樓") {
-      setIntermissionChoiceError("❌ 難道那塊餅乾堵住了你們的觀察力？小學生的塗鴉也稱不上藝術！請看清楚手上的線索，再選一次！");
+    } else {
+      setIntermissionChoiceError("❌ 「難道那塊餅乾堵住了你們的觀察力？請看清楚手上的線索，再選一次！」");
       audioEngine.playBeep(180, 0.3);
     }
+  };
+
+  const handleMirrorSuccess = () => {
+    setState((prev) => ({
+      ...prev,
+      hasStarCard: true,
+    }));
+    setItemDialog({
+      title: "解鎖成功！獲得梵谷星夜明信片",
+      icon: "🌌",
+      description: "已自動存入探險背包。",
+      nextLevelId: "loc_art_piano",
+    });
   };
 
   const handlePianoSuccess = () => {
@@ -325,7 +360,7 @@ export default function App() {
       setIntermissionSuccess("✅ 解鎖成功！溜滑梯的邊角隱藏著最後的秘密，去那裡，集齊屬於你們的畢業記憶。");
       scheduleAdvance("loc_primary_grass", 1200);
     } else {
-      setIntermissionChoiceError("❌ 那裡只有汗水與競賽，沒有我們遺失的純真，再找找看吧！");
+      setIntermissionChoiceError("❌ 「體育館雖然有純真，卻也已經摻雜了不少青春期的衝撞。去尋找那個一切從零開始、專屬於稚嫩童音的堡壘吧。」");
       audioEngine.playBeep(180, 0.3);
     }
   };
@@ -347,10 +382,75 @@ export default function App() {
   const handleLawnDiarySuccess = () => {
     setState((prev) => ({
       ...prev,
+      hasDiary: true,
       horcruxSolved: { ...prev.horcruxSolved, primary: true },
     }));
-    advanceToLevel("loc_explore_center");
+    setItemDialog({
+      title: "解鎖成功！獲得日記本",
+      icon: "📖",
+      description: "已自動存入探險背包。",
+      nextLevelId: "loc_explore_center",
+    });
   };
+
+  const handleBannerSuccess = () => {
+    setState((prev) => ({
+      ...prev,
+      hasBanner: true,
+    }));
+    setItemDialog({
+      title: "解鎖成功！獲得菁英活動布旗",
+      icon: "🛡️",
+      description: "已自動存入探險背包。",
+      nextLevelId: "loc_intermission4",
+    });
+  };
+
+  const confirmItemDialog = () => {
+    if (!itemDialog) return;
+    const next = itemDialog.nextLevelId;
+    setItemDialog(null);
+    advanceToLevel(next);
+  };
+
+  const backpackItems = [
+    {
+      key: "cookie",
+      icon: state.hasCookie ? "🍪" : "🔒",
+      name: "溫熱的餅乾",
+      desc: state.hasCookie
+        ? "一塊飄著溫熱香甜烘焙糕底氣味的餅乾。獲得地點宿舍，象徵精神。當你感到疲憊、低潮時，別忘了吃一口，它會給你滿滿的支持與精神鼓勵。"
+        : "（尚未獲得）",
+      unlocked: state.hasCookie,
+    },
+    {
+      key: "star",
+      icon: state.hasStarCard ? "🌌" : "🔒",
+      name: "梵谷《星夜》明信片",
+      desc: state.hasStarCard
+        ? "一張背面寫著特殊謎字、邊角微微磨損，被撕成一半的明信片。獲得地點藝文館，象徵美感。無論未來有多忙碌，都別忘了留給自己一雙能看見生活中微小美好的眼睛。"
+        : "（尚未獲得）",
+      unlocked: state.hasStarCard,
+    },
+    {
+      key: "diary",
+      icon: state.hasDiary ? "📖" : "🔒",
+      name: "褪色的舊日記本",
+      desc: state.hasDiary
+        ? "一本字跡歪歪扭扭、注音還會拼錯的舊日記本。獲得地點小學樓草皮，象徵純真。在未來複雜的世界裡，請時常與自己的內在對話，提醒自己始終保有那顆不被世俗污染、最澄澈純真的心。"
+        : "（尚未獲得）",
+      unlocked: state.hasDiary,
+    },
+    {
+      key: "banner",
+      icon: state.hasBanner ? "🛡️" : "🔒",
+      name: "菁英活動布旗",
+      desc: state.hasBanner
+        ? "一面帶有特殊弧度的紫色布旗，上面貼著參加過的菁英活動布章。獲得地點探索中心，象徵勇氣與力量。真正的菁英是失敗後還敢勇敢再試一次。帶著這份力量去跨越未來的挑戰吧！"
+        : "（尚未獲得）",
+      unlocked: state.hasBanner,
+    },
+  ];
 
   const activeLevel = LEVELS.find((l) => l.id === state.currentLevelId) || LEVELS[0];
 
@@ -379,11 +479,11 @@ export default function App() {
           <button
             onClick={() => { setBackpackTab("items"); setMapOpen(true); audioEngine.playBeep(600, 0.1); }}
             className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-amber-700 hover:bg-amber-600 font-bold text-xs text-white rounded-lg transition-all shadow-md active:scale-95 leading-none border border-amber-600/20"
-            title="查看解密背包與探案日誌"
+            title="查看探險背包與探索地圖"
           >
             <span className="text-sm">🎒</span>
-            <span className="hidden sm:inline">偵探背包與日誌</span>
-            <span className="sm:hidden">偵探背包</span>
+            <span className="hidden sm:inline">探險背包</span>
+            <span className="sm:hidden">背包</span>
           </button>
           <button
             onClick={() => {
@@ -465,7 +565,7 @@ export default function App() {
               />
             )}
 
-            {state.currentLevelId === "loc_art_mirror" && <MirrorWallLevel onSuccess={() => advanceToLevel("loc_art_piano")} />}
+            {state.currentLevelId === "loc_art_mirror" && <MirrorWallLevel onSuccess={handleMirrorSuccess} />}
             {state.currentLevelId === "loc_art_piano" && <PianoLevel onSuccess={handlePianoSuccess} />}
 
             {state.currentLevelId === "loc_intermission3" && (
@@ -479,7 +579,7 @@ export default function App() {
             )}
 
             {state.currentLevelId === "loc_primary_grass" && <LawnDiaryLevel onSuccess={handleLawnDiarySuccess} />}
-            {state.currentLevelId === "loc_explore_center" && <BannerBlessingLevel onSuccess={() => advanceToLevel("loc_intermission4")} />}
+            {state.currentLevelId === "loc_explore_center" && <BannerBlessingLevel onSuccess={handleBannerSuccess} />}
 
             {state.currentLevelId === "loc_intermission4" && (
               <LocationChoiceScreen
@@ -496,26 +596,70 @@ export default function App() {
 
             {state.currentLevelId === "finish" && (
               <div className="space-y-6 text-center py-6">
-                <span className="text-5xl animate-bounce block">🎓</span>
-                <h2 className="text-3xl font-serif italic text-amber-500 font-bold tracking-widest">🎉 解鎖成功！畢業快樂！</h2>
-                <div className="max-w-2xl mx-auto bg-stone-950/80 p-6 md:p-8 rounded-2xl border border-stone-800 text-left space-y-4 shadow-2xl text-stone-300 leading-relaxed text-base">
-                  <p>體育館的燈光瞬間全亮！螢幕上跳出華麗的煙火特效。體育館遠處的暗門緩緩打開，五個黑黑的人影從遠處頂光走來——嫌犯正是九年級的五位數學老師們！</p>
-                  <p className="font-bold text-amber-500">「沒錯，這場天羅地網的謎題，就是我們送給你們的畢業禮物。」</p>
-                  <p>雖然會考已經結束，但我們在旁看著你們解謎，其實是想在最後帶領你們重新走過這三年的足跡，檢視你們在康橋國中三年，用汗水與挑戰換來的四份重要精神：</p>
-                  <ul className="text-sm space-y-2 list-disc pl-5 text-stone-400">
-                    <li>到了【宿舍】解開鎖頭，代表你們找到了『精神』</li>
-                    <li>到了【藝文館】透過鏡像看清旋律，代表你們找到了『美感』</li>
-                    <li>到了【小學樓】在草皮上追尋日記，代表你們找到了『純真』</li>
-                    <li>到了【探索中心】與【體育館】，看到了六環並破解完美數，代表你們找到了『力量』與『汗水』</li>
-                  </ul>
-                  <p className="text-stone-400 text-sm italic">畢業驚喜從來沒有消失，它早就刻在你們這三年的成長足跡裡。願你們帶著這四份精神，繼續在高中揮灑青春，勇敢圓夢！</p>
-                  <p className="text-amber-400/80 text-xs border-t border-stone-800 pt-4">
-                    🎁 彩蛋：第一名解開最後一關「0628 完美數」並向數學老師出示平板成功截圖的人，可以領取全場最特別的「神祕驚喜禮物」一份！
-                  </p>
-                </div>
-                <button onClick={handleResetGame} className="px-6 py-2 bg-stone-900 hover:bg-stone-800 border border-stone-800 text-xs text-stone-400 hover:text-stone-200 transition font-bold rounded">
-                  🔄 重置遊戲
-                </button>
+                <AnimatePresence mode="wait">
+                  {finishStep === 1 && (
+                    <motion.div key="f1" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="space-y-6">
+                      <span className="text-5xl animate-bounce block">🎓</span>
+                      <h2 className="text-3xl font-serif italic text-amber-500 font-bold tracking-widest">解鎖成功，畢業快樂</h2>
+                      <button
+                        type="button"
+                        onClick={() => { setFinishStep(2); audioEngine.playBeep(700, 0.12); }}
+                        className="px-8 py-3 bg-amber-700 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg"
+                      >
+                        嫌犯揭曉
+                      </button>
+                    </motion.div>
+                  )}
+                  {finishStep === 2 && (
+                    <motion.div key="f2" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="space-y-6">
+                      <div className="max-w-2xl mx-auto bg-stone-950/80 p-6 md:p-8 rounded-2xl border border-stone-800 text-left space-y-4 shadow-2xl text-stone-300 leading-relaxed text-base">
+                        <p>體育館遠處的暗門緩緩打開，五個黑黑的人影從遠處頂光走來。</p>
+                        <p className="font-bold text-amber-400">沒有看錯！那五個身影逐漸清晰，嫌犯正是九年級的五位數學老師們！</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => { setFinishStep(3); audioEngine.playBeep(700, 0.12); }}
+                        className="px-8 py-3 bg-amber-700 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg"
+                      >
+                        領取畢業驚喜
+                      </button>
+                    </motion.div>
+                  )}
+                  {finishStep === 3 && (
+                    <motion.div key="f3" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="space-y-6">
+                      <div className="max-w-2xl mx-auto bg-stone-950/80 p-6 md:p-8 rounded-2xl border border-stone-800 text-left space-y-4 shadow-2xl text-stone-300 leading-relaxed text-base">
+                        <p className="font-bold text-amber-500">「沒錯，這場天羅地網的謎題，就是我們送給你們的畢業禮物。」</p>
+                        <p>雖然會考已經結束，但我們在旁看著你們解謎，其實是想在最後帶領你們重新走過這三年的足跡，檢視你們在康橋國中三年，用汗水與挑戰換來的四份重要精神：</p>
+                        <ul className="text-sm space-y-3 list-disc pl-5 text-stone-400">
+                          <li>到了【宿舍】解開鎖頭，代表你們找到了『精神』，那代表面對未來挑戰時，能夠平靜面對與自我修復的能力；</li>
+                          <li>到了【藝文館】透過鏡像看清旋律，代表你們找到了『美感』，那代表生命中不可或缺的藝術與創造力；</li>
+                          <li>到了【小學樓】在草皮上追尋日記，代表你們找到了『純真』，那是無論長多大、走得多遠，都絕對不能忘記的初心與無邪；</li>
+                          <li>最後，到了【探索中心】，找到布旗中的線索，代表你們找到了『勇氣』與『力量』，那是你們這三年不斷蛻變、超越自我的體能證明！</li>
+                        </ul>
+                        <p className="text-stone-400 text-sm italic">畢業驚喜從來沒有消失，它早就刻在你們這三年的成長足跡裡。願你們帶著這四份精神，繼續在高中揮灑青春，勇敢圓夢！</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => { setFinishStep(4); setConfettiActive(true); audioEngine.playBeep(880, 0.2); }}
+                        className="px-8 py-3 bg-amber-700 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg"
+                      >
+                        恭喜畢業
+                      </button>
+                    </motion.div>
+                  )}
+                  {finishStep === 4 && (
+                    <motion.div key="f4" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="space-y-6">
+                      <div className="max-w-2xl mx-auto bg-stone-950/80 p-6 md:p-8 rounded-2xl border border-stone-800 text-left space-y-4 shadow-2xl text-stone-300 leading-relaxed text-base">
+                        <p className="text-amber-400/90 text-sm">
+                          🎁 彩蛋：不過，既然是解謎，我們還是很講究速度的！現在，第一名解開最後一關『0628完美數』、並向數學老師出示平板成功截圖畫面的人……可以領取全場最特別、最獨一無二的『神祕驚喜禮物』一份！
+                        </p>
+                      </div>
+                      <button onClick={handleResetGame} className="px-6 py-2 bg-stone-900 hover:bg-stone-800 border border-stone-800 text-xs text-stone-400 hover:text-stone-200 transition font-bold rounded">
+                        🔄 重置遊戲
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )}
 
@@ -538,6 +682,14 @@ export default function App() {
           </div>
         )}
       </main>
+
+      <ItemUnlockDialog
+        open={!!itemDialog}
+        title={itemDialog?.title ?? ""}
+        description={itemDialog?.description}
+        icon={itemDialog?.icon}
+        onConfirm={confirmItemDialog}
+      />
 
       <AnimatePresence>
         {showAlarmFailure && (
@@ -594,7 +746,7 @@ export default function App() {
               <div className="flex justify-between items-start border-b border-stone-800 pb-4 mb-4">
                 <div className="flex items-center gap-2">
                   <span className="text-2xl">🎒</span>
-                  <h3 className="text-xl font-bold text-stone-100 font-serif italic tracking-wide">偵探探險包 ─ 案件檔案室</h3>
+                  <h3 className="text-xl font-bold text-stone-100 font-serif italic tracking-wide">探險背包 ─ 探索地圖</h3>
                 </div>
                 <button type="button" onClick={() => { setMapOpen(false); audioEngine.playBeep(500, 0.08); }}
                   className="px-3 py-1 bg-stone-900 border border-stone-800 text-stone-400 hover:text-white rounded-lg text-xs font-mono font-bold hover:bg-stone-800 transition-colors">關閉返回</button>
@@ -606,7 +758,7 @@ export default function App() {
                     className={`flex-1 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 border ${
                       backpackTab === tab ? "bg-amber-950/10 text-amber-500 border-amber-500/20 shadow-inner" : "bg-stone-900/40 text-stone-400 border-transparent hover:text-stone-200"
                     }`}>
-                    <span>{tab === "items" ? "🎒 探險背包物件" : "📜 探案歷史日誌與快速傳送"}</span>
+                    <span>{tab === "items" ? "🎒 探險背包" : "🗺 探索地圖"}</span>
                   </button>
                 ))}
               </div>
@@ -615,17 +767,12 @@ export default function App() {
                 <div className="space-y-4">
                   <p className="text-xs text-stone-400 leading-relaxed mb-4">💡 這裡存放著你從校園各個角落解鎖、尋得的核心道具。</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {[
-                      { icon: "📬", name: "紫底燙金畢業邀請信", desc: "清晨於校外門廊視窗拾獲，印有精緻圖騰。這是引你前往辦公室與保險箱的信物。", unlocked: true },
-                      { icon: state.hasCookie ? "🍪" : "🔒", name: "導師的大理石曲奇", desc: state.hasCookie ? "宿舍置物櫃解鎖所藏。由全體九年級導師親手烤焙，香濃美味，象徵真摯勇氣與情誼！" : "（預計於宿舍交誼廳解鎖獲得）傳來溫熱香甜的大理石烘焙糕底氣味……", unlocked: state.hasCookie },
-                      { icon: state.hasPalette ? "🎨" : "🔒", name: "木質調色盤", desc: state.hasPalette ? "藝文館中解密獲得。殘留著奇異亮麗的三原色顏料，似乎可用於對照視差線條的場合。" : "（預計於藝文館鏡牆或琴房中解鎖獲得）屬於藝術之美的美學靈感……", unlocked: state.hasPalette },
-                      { icon: state.hasStarCard ? "🖼️" : "🔒", name: "殘缺的《星夜》卡片", desc: state.hasStarCard ? "繪有梵谷名作星夜，背部帶有對應鏡子左右反轉的模糊手寫數字。可以配合鏡牆破解琴房代碼。" : "（預計於藝文專區解鎖獲得）屬於星空的特殊浪漫謎字……", unlocked: state.hasStarCard },
-                    ].map((item) => (
-                      <div key={item.name} className={`p-4 rounded-xl border flex gap-4 items-start shadow-md transition-all ${item.unlocked ? "border-stone-800 bg-stone-900/50" : "border-stone-900/20 bg-stone-950/20 opacity-45"}`}>
-                        <div className="text-3xl p-2.5 bg-stone-950 rounded-xl border border-stone-800">{item.icon}</div>
-                        <div className="space-y-0.5">
-                          <h4 className={`text-sm font-bold font-serif italic ${item.unlocked ? "text-amber-500" : "text-stone-500"}`}>{item.name}</h4>
-                          <p className="text-[11px] text-stone-400 leading-relaxed">{item.desc}</p>
+                    {backpackItems.map((item) => (
+                      <div key={item.key} className={`p-4 rounded-xl border flex gap-4 items-start shadow-md transition-all ${item.unlocked ? "border-stone-800 bg-stone-900/50" : "border-stone-900/20 bg-stone-950/40 opacity-70"}`}>
+                        <div className={`text-3xl p-2.5 rounded-xl border border-stone-800 ${item.unlocked ? "bg-stone-950" : "bg-black/80"}`}>{item.icon}</div>
+                        <div className="space-y-0.5 min-w-0">
+                          <h4 className={`text-sm font-bold font-serif italic ${item.unlocked ? "text-amber-500" : "text-stone-600"}`}>{item.name}</h4>
+                          <p className={`text-[11px] leading-relaxed ${item.unlocked ? "text-stone-400" : "text-stone-700"}`}>{item.desc}</p>
                         </div>
                       </div>
                     ))}
@@ -636,7 +783,7 @@ export default function App() {
               {backpackTab === "progress" && (
                 <div className="space-y-4">
                   <p className="text-xs text-stone-400 leading-relaxed mb-4 bg-amber-950/10 p-2.5 border border-amber-500/15 rounded-xl">
-                    💡 <b>地圖自由傳送已解鎖！</b>當你破關、卡關或需要重溫時，隨時點擊前方已解鎖或破解的關卡，即可立馬「快速傳送且回頭體驗」之前的解密情境或是尋找線索！
+                    💡 當你破關或需要重溫時，隨時點擊下方已解鎖的關卡，即可快速『回頭體驗』先前的解謎情境，或是尋找遺漏的線索！
                   </p>
                   <div className="space-y-2 max-h-[45vh] overflow-y-auto scrollbar-detective pr-2">
                     {LEVELS.map((node, index) => {

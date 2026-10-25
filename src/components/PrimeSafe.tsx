@@ -39,18 +39,22 @@ export function PrimeSafe({ onSuccess }: PrimeSafeProps) {
 
   return (
     <div className="space-y-6">
-      <LevelHeader title="辦公桌上的保險箱 — 是嫌犯嗎？" />
+      <LevelHeader title="便利貼上的數字" />
 
       <p className="text-slate-300 leading-relaxed text-base">
         「喀嗒」！九導辦公室的門終於打開了，裡面一片寂靜。你快步走到導師的辦公桌前，桌上空無一物，只放著一個精緻的小型按鍵式保險箱，面板上印著
-        <span className="text-sky-400 font-bold">「Prime Power Only」</span>。密碼鎖旁貼著一張顯眼的黃色便利貼，上面用粗體字寫著一個巨大的數字：
-        <span className="text-sky-400 text-2xl font-mono font-black ml-1">1001</span>。
+        <span className="text-sky-400 font-bold">「Prime Factors Only」</span>。密碼鎖旁貼著一張顯眼的黃色便利貼，上面用粗體字寫著一個巨大的數字：
+        <span className="text-sky-400 text-2xl font-mono font-black ml-1">「1001」</span>。
         你心中不禁懷疑：這是導師藏起來的畢業禮物？還是嫌犯故意留下的挑釁？
       </p>
 
       <blockquote className="border-l-2 border-sky-600/50 pl-4 py-2 bg-sky-950/10 rounded-r text-sm text-sky-200/90 italic">
         「唯有拆解出最原始的靈魂，並按成長的順序排列，才能開啟。」
       </blockquote>
+
+      <p className="text-center text-amber-400/90 text-sm font-mono tracking-wide">
+        BREAK IT DOWN. BUILD IT BACK.（拆解它，再重新理解它）
+      </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-2">
         <div className="flex justify-center">

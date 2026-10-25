@@ -37,38 +37,38 @@ export function FinalPerfectLock({ onSuccess }: FinalPerfectLockProps) {
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      <LevelHeader title="體育館內 — 完美的人與終極內鎖" />
+      <LevelHeader title="完美的人" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <blockquote className="border-l-4 border-amber-600 pl-4 py-2 italic bg-amber-950/20 text-stone-100 rounded-r text-sm leading-relaxed lg:col-span-2">
-          「恭喜你們抵達了終點。我曾說過，我是個『完美的人』。
-          想要見到我的真面目拿到畢業驚喜，請在螢幕上輸入我的生日，我的生日是由『兩個完美數字』組成。
-          完美數字是數學界中，全體正因數（除本身外）相加總和等於自身的神秘數字。」
-        </blockquote>
+      <p className="text-stone-300 leading-relaxed text-base">
+        順利開啟體育館大門後，空曠的場地上靜悄悄的，只有前方正中央的大螢幕亮著。螢幕上顯示：
+      </p>
 
-        <div className="flex justify-center lg:col-span-2">
-          <div className="p-5 rounded-2xl bg-stone-950 border-2 border-amber-900/40 w-full max-w-[300px] shadow-2xl mx-auto">
-            <div className="bg-black py-3.5 px-3 rounded-xl border border-rose-950 text-center text-3xl font-mono text-[#f43f5e] font-extrabold tracking-widest min-h-[55px] mb-4 shadow-[inset_0_0_12px_rgba(239,68,68,0.3)] select-all">
-              {code || '----'}
-            </div>
-            <div className="grid grid-cols-3 gap-2.5">
-              {KEYS.map((key) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => handleKey(key)}
-                  className={`h-11 rounded-lg flex items-center justify-center font-bold tracking-wide transition active:scale-95 ${
-                    key === '驗證'
-                      ? 'bg-amber-600 hover:bg-amber-500 text-stone-950 font-black text-sm shadow-lg shadow-amber-500/20'
-                      : key === '清除'
-                        ? 'bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs'
-                        : 'bg-stone-900 hover:bg-stone-800 border border-stone-800 text-stone-200 text-base'
-                  }`}
-                >
-                  {key}
-                </button>
-              ))}
-            </div>
+      <blockquote className="border-l-4 border-amber-600 pl-4 py-2 italic bg-amber-950/20 text-stone-100 rounded-r text-sm leading-relaxed">
+        「完美數字是數學界中，全體正因數（除本身外）相加總和等於自身的神秘數字。」
+      </blockquote>
+
+      <div className="flex justify-center">
+        <div className="p-5 rounded-2xl bg-stone-950 border-2 border-amber-900/40 w-full max-w-[300px] shadow-2xl mx-auto">
+          <div className="bg-black py-3.5 px-3 rounded-xl border border-rose-950 text-center text-3xl font-mono text-[#f43f5e] font-extrabold tracking-widest min-h-[55px] mb-4 shadow-[inset_0_0_12px_rgba(239,68,68,0.3)] select-all">
+            {code || '----'}
+          </div>
+          <div className="grid grid-cols-3 gap-2.5">
+            {KEYS.map((key) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => handleKey(key)}
+                className={`h-11 rounded-lg flex items-center justify-center font-bold tracking-wide transition active:scale-95 ${
+                  key === '驗證'
+                    ? 'bg-amber-600 hover:bg-amber-500 text-stone-950 font-black text-sm shadow-lg shadow-amber-500/20'
+                    : key === '清除'
+                      ? 'bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs'
+                      : 'bg-stone-900 hover:bg-stone-800 border border-stone-800 text-stone-200 text-base'
+                }`}
+              >
+                {key}
+              </button>
+            ))}
           </div>
         </div>
       </div>

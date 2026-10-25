@@ -11,7 +11,8 @@ interface UVKeypadProps {
 }
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '清除', '0', '確定'];
-const UV_KEYS = ['1', '2', '4', '8'];
+/** Only key 8 shows fingerprint under UV (modified lesson plan). */
+const UV_KEYS = ['8'];
 const PASSWORD = '8421';
 
 export function UVKeypad({ onSuccess }: UVKeypadProps) {
@@ -49,11 +50,11 @@ export function UVKeypad({ onSuccess }: UVKeypadProps) {
       <LevelHeader title="密碼的節奏" />
 
       <p className="text-stone-300 leading-relaxed">
-        校門緊閉，假日的校園空無一人。你拿起預備好的<span className="text-amber-500 font-semibold">紫外線燈</span>往按鍵上一照——部分按鍵浮現指紋螢光。
+        校門緊閉，假日的校園空無一人，只有警衛室的刷卡機隱約閃爍著紅光。你拿起預備好的紫外線燈往按鍵上一照——發現數字「8」的按鍵上殘留著指紋螢光。
       </p>
 
       <blockquote className="border-l-2 border-amber-600/50 pl-4 py-2 bg-amber-950/10 rounded-r text-sm text-amber-200/90 italic">
-        「安全守則：密碼的節奏如同細胞分裂般成長，但守衛的密令要求我們『溯源而上』。」
+        「安全守則：數字的規律如同細胞分裂般成長，守衛的密令要求我們——逆著成長，回到源頭。」
       </blockquote>
 
       <button

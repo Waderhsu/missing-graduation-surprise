@@ -29,10 +29,11 @@ export function LawnDiaryLevel({ onSuccess }: LawnDiaryLevelProps) {
 
   return (
     <div className="space-y-6">
-      <LevelHeader title="時光日記" />
+      <LevelHeader title="ㄖˋ ㄐㄧˋ" />
 
       <p className="text-stone-300 leading-relaxed text-base">
-        你來到小學樓前那片熟悉的草皮，想起過去無憂無慮、吃飽飯後與同學遊戲的時光。在草皮的一角，你發現了一本被遺忘的日記……
+        你來到小學樓前那片熟悉的草皮，想起過去無憂無慮、吃飽飯後與同學遊戲的時光。看著眼前的景象，你忍不住在心裡感嘆：「小學的時候，這裡就是我們的遊樂場，每天吃飽最喜歡和同學在這裡跑跳。唉，國中的課業壓力真是沉重啊……還好有這片草皮，這是我現在唯一能讓心靈喘口氣、找回一點童心的地方了。」
+        在草皮的一角，你發現了一本被遺忘的日記.........
       </p>
 
       <ImagePlaceholder src={LEVEL_IMAGES.lawnDiary} alt="小學樓草皮日記" className="max-w-3xl mx-auto" />

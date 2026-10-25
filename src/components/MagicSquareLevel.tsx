@@ -31,10 +31,10 @@ export function MagicSquareLevel({ onSuccess }: MagicSquareLevelProps) {
 
   return (
     <div className="space-y-6">
-      <LevelHeader title="交誼廳 — 平衡的九宮置物櫃" />
+      <LevelHeader title="絕對平衡的置物櫃" />
 
       <p className="text-stone-300 leading-relaxed text-base">
-        推開宿舍大門，你走進一樓的交誼廳。在交誼廳正中央的桌上，放著一個上了「三位數密碼鎖」的密碼盒。盒子旁邊，貼著一張交誼廳「九宮格置物櫃」的平面配置圖，上面填著幾個數字，但有三個櫃子的位置被畫上了 🔴、🔵、🟡 的符號。密碼鎖從左到右，旁邊貼著紅、藍、黃的貼紙，暗示著解開這道鎖的順序。
+        推開沉重的宿舍大門，熟悉的交誼廳映入眼簾，大家在這裡挑燈夜戰、互相打氣的畫面彷彿是昨天發生的事情。這時你看到在正中央的桌上，放著一個有「三位數密碼鎖」的盒子，旁邊有一張宿舍置物櫃的九宮格配置圖.......
       </p>
 
       <ImagePlaceholder
@@ -58,7 +58,6 @@ export function MagicSquareLevel({ onSuccess }: MagicSquareLevelProps) {
 
         <form onSubmit={handleSubmit} className="bg-stone-900 border border-stone-800 p-5 rounded-xl space-y-4">
           <span className="text-xs font-mono text-stone-500 uppercase tracking-widest block">🔒 三位數密碼鎖</span>
-          <p className="text-xs text-stone-400">依 🔴 → 🔵 → 🟡 順序，算出三格數字並組合。</p>
             <div className="relative">
               <Key className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
               <input
