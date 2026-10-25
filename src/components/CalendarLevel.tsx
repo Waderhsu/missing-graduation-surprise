@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Lock } from 'lucide-react';
 import { audioEngine } from './AudioEngine';
 import { ImagePlaceholder } from './ImagePlaceholder';
 import { LevelHeader } from './LevelHeader';
@@ -64,14 +63,6 @@ export function CalendarLevel({ onSuccess }: CalendarLevelProps) {
             {password || '----'}
           </div>
           <NumericKeypad onKey={handleKey} confirmLabel="解鎖" />
-          <button
-            type="button"
-            onClick={submit}
-            className="w-full py-3.5 bg-sky-700 hover:bg-sky-600 text-white font-bold rounded flex items-center justify-center gap-2 text-sm transition shadow-lg"
-          >
-            <Lock className="h-4 w-4" />
-            驗證並解鎖大門
-          </button>
           {error && (
             <div className="text-red-400 text-xs font-semibold text-center py-2 bg-red-950/20 border border-red-500/10 rounded">{error}</div>
           )}

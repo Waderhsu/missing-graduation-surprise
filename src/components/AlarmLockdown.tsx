@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Key, Volume2, VolumeX } from 'lucide-react';
+import { Volume2, VolumeX } from 'lucide-react';
 import { audioEngine } from './AudioEngine';
 import { ImagePlaceholder } from './ImagePlaceholder';
 import { LevelHeader } from './LevelHeader';
+import { LetterKeyboard } from './LetterKeyboard';
 import { LEVEL_IMAGES } from '../levelAssets';
 
 interface AlarmLockdownProps {
@@ -11,7 +12,7 @@ interface AlarmLockdownProps {
   onFailure: () => void;
 }
 
-/** 警報倒數秒數（預設 5 分鐘 = 300）。改這裡即可調整時間。 */
+/** Alarm countdown seconds (default 5 min = 300). Change here to adjust. */
 export const ALARM_COUNTDOWN_SECONDS = 5 * 60;
 
 const INITIAL_SECONDS = ALARM_COUNTDOWN_SECONDS;
@@ -64,8 +65,7 @@ export function AlarmLockdown({ onSuccess, onFailure }: AlarmLockdownProps) {
     return () => window.clearInterval(timer);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = () => {
     if (answer.trim().toLowerCase() === 'math') {
       audioEngine.playBeep(987, 0.1);
       audioEngine.playBeep(1318, 0.3);
@@ -102,6 +102,10 @@ export function AlarmLockdown({ onSuccess, onFailure }: AlarmLockdownProps) {
         你衝向警衛室裡的電腦，必須在時間耗盡前解開消音頻率並終止警報！
       </p>
 
+      <p className="text-sm text-stone-400 leading-relaxed bg-stone-900/50 border border-stone-800 rounded-xl p-3">
+        目前的干擾頻率為非穩定狀態，請找出「缺失的頻率數值」以及「關鍵頻率的所在位置」，並轉化為代碼中斷警報。
+      </p>
+
       <div
         className={`flex items-center justify-between gap-4 rounded-xl border px-4 py-3 ${
           isUrgent
@@ -123,46 +127,34 @@ export function AlarmLockdown({ onSuccess, onFailure }: AlarmLockdownProps) {
 
       <ImagePlaceholder src={LEVEL_IMAGES.alarm} alt="警報系統畫面" className="max-w-lg mx-auto" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
         <div className="bg-[#0a0f0d] border border-[#22c55e]/25 rounded-xl p-4 sm:p-5 font-mono space-y-4 shadow-inner">
           <div className="text-[#22c55e] text-center space-y-3">
             <div className="text-xl sm:text-2xl font-bold tracking-widest">? ? 10 17 26 ?? 50</div>
           </div>
-          <p className="text-[11px] sm:text-xs leading-relaxed text-stone-400 text-center bg-stone-950/60 border border-stone-800 rounded-lg p-3">
-            「目前的干擾頻率為非穩定狀態，請找出缺失的頻率數值與關鍵頻率的位置，並轉化為代碼中斷警報。」
-          </p>
           <p className="text-[11px] sm:text-xs leading-relaxed text-amber-200/80 text-left bg-amber-950/20 border border-amber-700/30 rounded-lg p-3">
             ⚠️系統警告：本機無法讀取超出對照表上限的未知頻率，若遇超載數值，請將其拆解為獨立的單一訊號，再逐一進行轉譯。
           </p>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col justify-center gap-4 bg-stone-950 border border-stone-800 rounded-xl p-5"
-        >
-          <div>
-            <span className="text-xs font-mono text-stone-500 uppercase tracking-widest block mb-2">
-              輸入消音頻率代碼
-            </span>
-            <div className="relative">
-              <Key className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-stone-500" />
-              <input
-                type="text"
-                value={answer}
-                onChange={(e) => { setError(''); setAnswer(e.target.value.toUpperCase()); }}
-                maxLength={10}
-                placeholder="----"
-                autoComplete="off"
-                className="w-full pl-12 pr-4 py-3.5 border border-stone-700 bg-stone-900 font-mono tracking-[0.35em] text-[#22c55e] rounded-lg focus:border-red-500 outline-none text-center text-lg uppercase font-bold"
-              />
-            </div>
+        <div className="flex flex-col gap-4 bg-stone-950 border border-stone-800 rounded-xl p-5">
+          <span className="text-xs font-mono text-stone-500 uppercase tracking-widest">
+            輸入消音頻率代碼
+          </span>
+          <div className="w-full py-3.5 border border-stone-700 bg-stone-900 font-mono tracking-[0.45em] text-[#22c55e] rounded-lg text-center text-xl uppercase font-bold min-h-[52px]">
+            {answer || '----'}
           </div>
-          <button
-            type="submit"
-            className="w-full py-3.5 bg-red-700 hover:bg-red-600 text-white font-bold rounded-lg shadow-lg active:scale-[0.98] transition"
-          >
-            中斷警報器
-          </button>
+          <LetterKeyboard
+            onKey={(ch) => {
+              setError('');
+              setAnswer((prev) => (prev.length < 8 ? prev + ch : prev));
+              audioEngine.playBeep(440, 0.05);
+            }}
+            onBackspace={() => setAnswer((prev) => prev.slice(0, -1))}
+            onClear={() => setAnswer('')}
+            onSubmit={submit}
+            submitLabel="中斷警報器"
+          />
           <AnimatePresence>
             {error && (
               <motion.p
@@ -175,7 +167,7 @@ export function AlarmLockdown({ onSuccess, onFailure }: AlarmLockdownProps) {
               </motion.p>
             )}
           </AnimatePresence>
-        </form>
+        </div>
       </div>
     </div>
   );

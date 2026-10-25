@@ -416,38 +416,30 @@ export default function App() {
   const backpackItems = [
     {
       key: "cookie",
-      icon: state.hasCookie ? "🍪" : "🔒",
+      icon: "🍪",
       name: "溫熱的餅乾",
-      desc: state.hasCookie
-        ? "一塊飄著溫熱香甜烘焙糕底氣味的餅乾。獲得地點宿舍，象徵精神。當你感到疲憊、低潮時，別忘了吃一口，它會給你滿滿的支持與精神鼓勵。"
-        : "（尚未獲得）",
+      desc: "一塊飄著溫熱香甜烘焙糕底氣味的餅乾。獲得地點宿舍，象徵精神。當你感到疲憊、低潮時，別忘了吃一口，它會給你滿滿的支持與精神鼓勵。",
       unlocked: state.hasCookie,
     },
     {
       key: "star",
-      icon: state.hasStarCard ? "🌌" : "🔒",
+      icon: "🌌",
       name: "梵谷《星夜》明信片",
-      desc: state.hasStarCard
-        ? "一張背面寫著特殊謎字、邊角微微磨損，被撕成一半的明信片。獲得地點藝文館，象徵美感。無論未來有多忙碌，都別忘了留給自己一雙能看見生活中微小美好的眼睛。"
-        : "（尚未獲得）",
+      desc: "一張背面寫著特殊謎字、邊角微微磨損，被撕成一半的明信片。獲得地點藝文館，象徵美感。無論未來有多忙碌，都別忘了留給自己一雙能看見生活中微小美好的眼睛。",
       unlocked: state.hasStarCard,
     },
     {
       key: "diary",
-      icon: state.hasDiary ? "📖" : "🔒",
+      icon: "📖",
       name: "褪色的舊日記本",
-      desc: state.hasDiary
-        ? "一本字跡歪歪扭扭、注音還會拼錯的舊日記本。獲得地點小學樓草皮，象徵純真。在未來複雜的世界裡，請時常與自己的內在對話，提醒自己始終保有那顆不被世俗污染、最澄澈純真的心。"
-        : "（尚未獲得）",
+      desc: "一本字跡歪歪扭扭、注音還會拼錯的舊日記本。獲得地點小學樓草皮，象徵純真。在未來複雜的世界裡，請時常與自己的內在對話，提醒自己始終保有那顆不被世俗污染、最澄澈純真的心。",
       unlocked: state.hasDiary,
     },
     {
       key: "banner",
-      icon: state.hasBanner ? "🛡️" : "🔒",
+      icon: "🛡️",
       name: "菁英活動布旗",
-      desc: state.hasBanner
-        ? "一面帶有特殊弧度的紫色布旗，上面貼著參加過的菁英活動布章。獲得地點探索中心，象徵勇氣與力量。真正的菁英是失敗後還敢勇敢再試一次。帶著這份力量去跨越未來的挑戰吧！"
-        : "（尚未獲得）",
+      desc: "一面帶有特殊弧度的紫色布旗，上面貼著參加過的菁英活動布章。獲得地點探索中心，象徵勇氣與力量。真正的菁英是失敗後還敢勇敢再試一次。帶著這份力量去跨越未來的挑戰吧！",
       unlocked: state.hasBanner,
     },
   ];
@@ -507,7 +499,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-4xl w-full mx-auto p-4 md:p-6 pb-24 z-10 relative">
+      <main className={`flex-1 max-w-5xl w-full mx-auto p-4 md:p-6 z-10 relative ${state.currentLevelId === "finish" ? "pb-6 min-h-[calc(100vh-5.5rem)] flex flex-col" : "pb-24"}`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={state.currentLevelId}
@@ -515,7 +507,7 @@ export default function App() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
             transition={{ duration: 0.4 }}
-            className="bg-[#121214] border border-stone-800 p-6 md:p-8 rounded-2xl shadow-2xl relative backdrop-blur-md"
+            className={`bg-[#121214] border border-stone-800 p-6 md:p-8 rounded-2xl shadow-2xl relative backdrop-blur-md ${state.currentLevelId === "finish" ? "flex-1 flex flex-col justify-center min-h-[calc(100vh-8rem)]" : ""}`}
           >
             {state.currentLevelId === "intro" && (
               <div className="space-y-6 text-center py-6">
@@ -595,31 +587,34 @@ export default function App() {
             {state.currentLevelId === "loc_gym_inner" && <FinalPerfectLock onSuccess={() => advanceToLevel("finish")} />}
 
             {state.currentLevelId === "finish" && (
-              <div className="space-y-6 text-center py-6">
+              <div className="space-y-6 text-center py-8 md:py-12 flex-1 flex flex-col justify-center">
                 <AnimatePresence mode="wait">
                   {finishStep === 1 && (
-                    <motion.div key="f1" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="space-y-6">
-                      <span className="text-5xl animate-bounce block">🎓</span>
-                      <h2 className="text-3xl font-serif italic text-amber-500 font-bold tracking-widest">解鎖成功，畢業快樂</h2>
+                    <motion.div key="f1" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="space-y-8">
+                      <span className="text-6xl animate-bounce block">🎓</span>
+                      <h2 className="text-3xl md:text-4xl font-serif italic text-amber-500 font-bold tracking-widest">解鎖成功，畢業快樂</h2>
                       <button
                         type="button"
                         onClick={() => { setFinishStep(2); audioEngine.playBeep(700, 0.12); }}
-                        className="px-8 py-3 bg-amber-700 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg"
+                        className="px-10 py-3.5 bg-amber-700 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg text-base"
                       >
                         嫌犯揭曉
                       </button>
                     </motion.div>
                   )}
                   {finishStep === 2 && (
-                    <motion.div key="f2" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="space-y-6">
+                    <motion.div key="f2" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="space-y-8">
                       <div className="max-w-2xl mx-auto bg-stone-950/80 p-6 md:p-8 rounded-2xl border border-stone-800 text-left space-y-4 shadow-2xl text-stone-300 leading-relaxed text-base">
+                        <div className="flex justify-center gap-3 py-4 text-4xl opacity-80" aria-hidden>
+                          <span>👤</span><span>👤</span><span>👤</span><span>👤</span><span>👤</span>
+                        </div>
                         <p>體育館遠處的暗門緩緩打開，五個黑黑的人影從遠處頂光走來。</p>
                         <p className="font-bold text-amber-400">沒有看錯！那五個身影逐漸清晰，嫌犯正是九年級的五位數學老師們！</p>
                       </div>
                       <button
                         type="button"
                         onClick={() => { setFinishStep(3); audioEngine.playBeep(700, 0.12); }}
-                        className="px-8 py-3 bg-amber-700 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg"
+                        className="px-10 py-3.5 bg-amber-700 hover:bg-amber-600 text-white font-bold rounded-xl shadow-lg text-base"
                       >
                         領取畢業驚喜
                       </button>
@@ -768,13 +763,23 @@ export default function App() {
                   <p className="text-xs text-stone-400 leading-relaxed mb-4">💡 這裡存放著你從校園各個角落解鎖、尋得的核心道具。</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {backpackItems.map((item) => (
-                      <div key={item.key} className={`p-4 rounded-xl border flex gap-4 items-start shadow-md transition-all ${item.unlocked ? "border-stone-800 bg-stone-900/50" : "border-stone-900/20 bg-stone-950/40 opacity-70"}`}>
-                        <div className={`text-3xl p-2.5 rounded-xl border border-stone-800 ${item.unlocked ? "bg-stone-950" : "bg-black/80"}`}>{item.icon}</div>
-                        <div className="space-y-0.5 min-w-0">
-                          <h4 className={`text-sm font-bold font-serif italic ${item.unlocked ? "text-amber-500" : "text-stone-600"}`}>{item.name}</h4>
-                          <p className={`text-[11px] leading-relaxed ${item.unlocked ? "text-stone-400" : "text-stone-700"}`}>{item.desc}</p>
+                      item.unlocked ? (
+                        <div key={item.key} className="p-4 rounded-xl border border-stone-800 bg-stone-900/50 flex gap-4 items-start shadow-md">
+                          <div className="text-3xl p-2.5 rounded-xl border border-stone-800 bg-stone-950">{item.icon}</div>
+                          <div className="space-y-0.5 min-w-0">
+                            <h4 className="text-sm font-bold font-serif italic text-amber-500">{item.name}</h4>
+                            <p className="text-[11px] leading-relaxed text-stone-400">{item.desc}</p>
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div
+                          key={item.key}
+                          className="p-4 rounded-xl border border-stone-900 bg-black min-h-[96px] flex items-center justify-center shadow-inner"
+                          aria-label="尚未解鎖的道具"
+                        >
+                          <span className="text-3xl opacity-80">🔒</span>
+                        </div>
+                      )
                     ))}
                   </div>
                 </div>
@@ -786,28 +791,38 @@ export default function App() {
                     💡 當你破關或需要重溫時，隨時點擊下方已解鎖的關卡，即可快速『回頭體驗』先前的解謎情境，或是尋找遺漏的線索！
                   </p>
                   <div className="space-y-2 max-h-[45vh] overflow-y-auto scrollbar-detective pr-2">
-                    {LEVELS.map((node, index) => {
+                    {LEVELS.map((node) => {
                       const isUnlocked = state.unlockedLevels.includes(node.id);
                       const isCurrent = state.currentLevelId === node.id;
                       const isCompleted = state.completedLevels.includes(node.id) || node.id === "intro";
+                      if (!isUnlocked) {
+                        return (
+                          <div
+                            key={node.id}
+                            className="p-3.5 rounded-xl border border-stone-950 bg-black min-h-[64px] flex items-center justify-center cursor-not-allowed"
+                            aria-label="尚未解鎖的關卡"
+                          >
+                            <span className="text-xl opacity-80">🔒</span>
+                          </div>
+                        );
+                      }
                       return (
-                        <div key={node.id} onClick={() => { if (isUnlocked) { handleMapNodeJump(node.id); setMapOpen(false); } }}
+                        <div key={node.id} onClick={() => { handleMapNodeJump(node.id); setMapOpen(false); }}
                           className={`p-3.5 rounded-xl border transition-all text-left relative flex items-start gap-4 ${
                             isCurrent ? "bg-amber-950/20 border-amber-600/40 shadow-lg cursor-default"
-                            : isUnlocked ? "bg-stone-900/60 hover:bg-stone-900 border-stone-800 text-stone-300 hover:border-stone-700 cursor-pointer"
-                            : "bg-stone-950/40 border-stone-950 opacity-40 text-stone-600 cursor-not-allowed"
+                            : "bg-stone-900/60 hover:bg-stone-900 border-stone-800 text-stone-300 hover:border-stone-700 cursor-pointer"
                           }`}>
                           <div className="mt-0.5 shrink-0">
                             {isCurrent ? <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[10px] text-stone-950 font-bold animate-pulse">🕵️‍♂️</span>
                               : isCompleted ? <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-950/70 border border-emerald-500/50 text-[10px] text-emerald-400 font-bold">✓</span>
-                              : <span className="flex h-5 w-5 items-center justify-center rounded-full bg-stone-900 border border-stone-800 text-[10px] text-stone-600 font-mono">{index + 1}</span>}
+                              : <span className="flex h-5 w-5 items-center justify-center rounded-full bg-stone-900 border border-stone-800 text-[10px] text-amber-500 font-mono">•</span>}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className={`text-[10px] font-mono tracking-wider font-semibold uppercase ${isCurrent ? "text-amber-400" : isCompleted ? "text-stone-400" : "text-stone-600"}`}>📍 {node.locationName}</span>
+                              <span className={`text-[10px] font-mono tracking-wider font-semibold uppercase ${isCurrent ? "text-amber-400" : "text-stone-400"}`}>📍 {node.locationName}</span>
                               {isCurrent && <span className="text-[9px] bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded border border-amber-500/20 uppercase font-bold animate-pulse">探索中</span>}
                             </div>
-                            <h4 className={`text-sm mt-0.5 ${isCurrent ? "text-stone-100 font-bold" : isCompleted ? "text-stone-300" : "text-stone-500"}`}>{node.title}</h4>
+                            <h4 className={`text-sm mt-0.5 ${isCurrent ? "text-stone-100 font-bold" : "text-stone-300"}`}>{node.title}</h4>
                           </div>
                         </div>
                       );

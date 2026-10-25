@@ -67,13 +67,6 @@ export function MirrorWallLevel({ onSuccess }: MirrorWallLevelProps) {
             教室
           </label>
           <NumericKeypad onKey={handleKey} confirmLabel="前往" />
-          <button
-            type="button"
-            onClick={submit}
-            className="w-full py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition"
-          >
-            前往
-          </button>
           {error && <p className="text-red-400 text-xs text-center font-semibold">{error}</p>}
         </div>
       </div>

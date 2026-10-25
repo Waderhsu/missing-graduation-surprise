@@ -178,11 +178,14 @@ export function ParallelogramCanvas({ onSuccess }: ParallelogramCanvasProps) {
         </p>
       </div>
 
-      <ImagePlaceholder
-        src={LEVEL_IMAGES.tabletEnvelope}
-        alt="嫌犯信封與平板"
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+        <ImagePlaceholder
+          src={LEVEL_IMAGES.tabletEnvelope}
+          alt="嫌犯信封與平板"
+          className="w-full max-w-sm mx-auto lg:mx-0"
+        />
 
+        <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3 bg-stone-950/60 p-3 rounded-xl border border-stone-900">
         <div className="flex items-center gap-2 text-xs font-mono">
           <span className="text-stone-500">解鎖階段</span>
@@ -198,7 +201,7 @@ export function ParallelogramCanvas({ onSuccess }: ParallelogramCanvasProps) {
         </div>
       </div>
 
-      <div className="bg-stone-900/40 border border-stone-850/60 p-4 rounded-xl text-center">
+      <div className="bg-stone-900/40 border border-stone-850/60 p-3 rounded-xl text-center">
         <p className="text-sm font-semibold text-stone-200">{config.description}</p>
       </div>
 
@@ -208,7 +211,7 @@ export function ParallelogramCanvas({ onSuccess }: ParallelogramCanvasProps) {
           onPointerDown={stage < 4 ? handlePointerDown : undefined}
           onPointerMove={stage < 4 ? handlePointerMove : undefined}
           onPointerUp={stage < 4 ? handlePointerUp : undefined}
-          className="w-full max-w-[500px] aspect-[16/10] bg-[#0c0a09] border-[6px] border-[#292524] rounded-2xl relative shadow-2xl select-none overflow-hidden touch-none"
+          className="w-full max-w-[480px] aspect-[16/10] bg-[#0c0a09] border-[6px] border-[#292524] rounded-2xl relative shadow-2xl select-none overflow-hidden touch-none"
         >
           {ticks.map((t) => (
             <div key={t} className="absolute top-0 bottom-0 border-l border-stone-900/45 pointer-events-none" style={{ left: `${t}%` }} />
@@ -279,6 +282,8 @@ export function ParallelogramCanvas({ onSuccess }: ParallelogramCanvasProps) {
               </motion.div>
             )}
           </AnimatePresence>
+        </div>
+      </div>
         </div>
       </div>
     </div>

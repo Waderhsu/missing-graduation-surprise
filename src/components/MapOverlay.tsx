@@ -2,8 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { Check, Compass, MapPin, RotateCcw, RotateCw, TriangleAlert } from 'lucide-react';
 import { audioEngine } from './AudioEngine';
+import { CharKeyboard } from './CharKeyboard';
 import { LevelHeader } from './LevelHeader';
 import { LEVEL_IMAGES } from '../levelAssets';
+
+const PLACE_CHARS = ['宿', '舍', '體', '育', '館', '小', '學', '樓', '藝', '文'];
 
 interface MapOverlayProps {
   onSuccess: () => void;
@@ -54,9 +57,18 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
   const [loc2, setLoc2] = useState('');
   const [loc3, setLoc3] = useState('');
   const [loc4, setLoc4] = useState('');
+  const [activeField, setActiveField] = useState<'A' | 'B' | 'C' | 'D'>('A');
   const [error, setError] = useState('');
 
   const rotateRef = useRef<HTMLDivElement>(null);
+
+  const fieldValue = activeField === 'A' ? loc1 : activeField === 'B' ? loc2 : activeField === 'C' ? loc3 : loc4;
+  const setFieldValue = (v: string) => {
+    if (activeField === 'A') setLoc1(v);
+    else if (activeField === 'B') setLoc2(v);
+    else if (activeField === 'C') setLoc3(v);
+    else setLoc4(v);
+  };
   const dragRef = useRef<{ lastPointerAngle: number } | null>(null);
 
   const applyRotationDelta = useCallback((delta: number) => {
@@ -164,29 +176,80 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
         如果這兩顆星代表已經破解的地方，那麼平板上剩下的四顆星，一定就是嫌犯藏匿線索的地點！
       </blockquote>
 
-      <div className="flex flex-col items-center gap-3">
-        <span className="text-xs text-stone-400 text-center">
-          {aligned ? '🟢 星標已重合 — 提示圖已解鎖' : '🎯 在圓形區域拖曳旋轉紙地圖，或使用下方按鈕微調'}
-        </span>
+      {!aligned && (
+        <div className="flex flex-col items-center gap-3">
+          <span className="text-xs text-stone-400 text-center">
+            🎯 在圓形區域拖曳旋轉紙地圖，或使用下方按鈕微調
+          </span>
+          <div
+            ref={rotateRef}
+            onPointerDown={handlePointerDown}
+            className="relative w-full max-w-[min(480px,85vw)] aspect-square rounded-full border-4 border-stone-800 overflow-hidden shadow-2xl touch-none select-none bg-[#070b10] cursor-grab active:cursor-grabbing"
+            style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none' }}
+          >
+            <div className="absolute inset-0">
+              <div className="absolute inset-0 pointer-events-none z-10">
+                {TABLET_STARS.map(([x, y], i) => (
+                  <span
+                    key={`bg-${i}`}
+                    className="absolute text-xl -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_0_8px_rgba(250,204,21,0.9)]"
+                    style={{ left: `${x}%`, top: `${y}%` }}
+                  >
+                    ⭐
+                  </span>
+                ))}
+              </div>
+              <motion.div
+                animate={{ rotate: angle }}
+                transition={isDragging ? { duration: 0 } : { type: 'spring', damping: 24, stiffness: 200 }}
+                className="absolute inset-0 origin-center scale-120 pointer-events-none"
+              >
+                <img
+                  src={STAR_MAP}
+                  alt="校園紙地圖"
+                  draggable={false}
+                  className="absolute inset-0 w-full h-full object-contain opacity-[0.48] pointer-events-none"
+                />
+              </motion.div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <button type="button" onClick={() => applyRotationDelta(-5)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-stone-900 border border-stone-700 text-stone-300 text-xs font-bold hover:bg-stone-800 active:scale-95 transition touch-manipulation">
+              <RotateCcw className="h-4 w-4" /> -5°
+            </button>
+            <p className="text-[11px] text-stone-500 font-mono min-w-[5rem] text-center">{Math.round(angle)}°</p>
+            <button type="button" onClick={() => applyRotationDelta(5)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-stone-900 border border-stone-700 text-stone-300 text-xs font-bold hover:bg-stone-800 active:scale-95 transition touch-manipulation">
+              +5° <RotateCw className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="w-full max-w-xl py-8 text-center text-stone-500 text-xs border border-dashed border-stone-800 rounded-xl">
+            <Compass className="h-6 w-6 mx-auto text-stone-600 mb-2" />
+            <TriangleAlert className="h-4 w-4 inline text-amber-500 mr-1" />
+            請先旋轉紙地圖，讓星標與平板重合
+          </div>
+        </div>
+      )}
 
-        {aligned ? (
+      {aligned && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45 }}
             className="relative w-full"
           >
+            <p className="text-xs text-emerald-400 text-center mb-2">🟢 星標已重合 — 提示圖已解鎖</p>
             <img
               src={HINT_MAP}
               alt="星芒提示地圖"
               draggable={false}
               className="w-full rounded-xl border border-stone-800 shadow-2xl"
             />
-            <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute inset-0 pointer-events-none top-6">
               {HINT_MARKERS.map(({ label, x, y }) => (
                 <span
                   key={label}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-xs font-normal text-stone-950 border-1 border-white shadow-none"
+                  className="absolute -translate-x-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-xs font-normal text-stone-950 border border-white"
                   style={{ left: `${x}%`, top: `${y}%` }}
                 >
                   {label}
@@ -194,113 +257,56 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
               ))}
             </div>
           </motion.div>
-        ) : (
-          <>
-            <div
-              ref={rotateRef}
-              onPointerDown={handlePointerDown}
-              className="relative w-full max-w-[min(560px,85vw)] aspect-square rounded-full border-4 border-stone-800 overflow-hidden shadow-2xl touch-none select-none bg-[#070b10] cursor-grab active:cursor-grabbing"
-              style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none' }}
-            >
-              <div className="absolute inset-0">
-                <div className="absolute inset-0 pointer-events-none z-10">
-                  {TABLET_STARS.map(([x, y], i) => (
-                    <span
-                      key={`bg-${i}`}
-                      className="absolute text-xl -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_0_8px_rgba(250,204,21,0.9)]"
-                      style={{ left: `${x}%`, top: `${y}%` }}
-                    >
-                      ⭐
-                    </span>
-                  ))}
-                </div>
 
-                <motion.div
-                  animate={{ rotate: angle }}
-                  transition={isDragging ? { duration: 0 } : { type: 'spring', damping: 24, stiffness: 200 }}
-                  className="absolute inset-0 origin-center scale-120 pointer-events-none"
+          <div className="bg-stone-950 border border-stone-800 rounded-xl p-4 sm:p-5 space-y-4 w-full">
+            <h4 className="text-sm font-bold text-stone-200 flex items-center gap-1.5 border-b border-stone-800 pb-2">
+              <MapPin className="h-4 w-4 text-amber-500" />
+              解鎖秘密地點
+            </h4>
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <p className="text-xs text-stone-400">依提示圖 A、B、C、D 點選欄位後用鍵盤輸入：</p>
+              {([
+                { label: 'A' as const, value: loc1 },
+                { label: 'B' as const, value: loc2 },
+                { label: 'C' as const, value: loc3 },
+                { label: 'D' as const, value: loc4 },
+              ]).map((field) => (
+                <button
+                  key={field.label}
+                  type="button"
+                  onClick={() => setActiveField(field.label)}
+                  className={`w-full text-left rounded-lg border px-3 py-2.5 transition ${
+                    activeField === field.label
+                      ? 'border-amber-500 bg-amber-950/20'
+                      : 'border-stone-800 bg-stone-900'
+                  }`}
                 >
-                  <img
-                    src={STAR_MAP}
-                    alt="校園紙地圖"
-                    draggable={false}
-                    className="absolute inset-0 w-full h-full object-contain opacity-[0.48] pointer-events-none"
-                  />
-                </motion.div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
+                  <span className="text-[11px] font-mono text-amber-500 mr-2">{field.label}</span>
+                  <span className="text-sm text-stone-200">{field.value || '（點此輸入）'}</span>
+                </button>
+              ))}
+              <CharKeyboard
+                chars={PLACE_CHARS}
+                onKey={(ch) => {
+                  setError('');
+                  setFieldValue(fieldValue + ch);
+                  audioEngine.playBeep(500, 0.04);
+                }}
+                onBackspace={() => setFieldValue(fieldValue.slice(0, -1))}
+                onClear={() => setFieldValue('')}
+              />
+              {error && <p className="text-red-400 text-xs font-semibold">{error}</p>}
               <button
-                type="button"
-                onClick={() => applyRotationDelta(-5)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-stone-900 border border-stone-700 text-stone-300 text-xs font-bold hover:bg-stone-800 active:scale-95 transition touch-manipulation"
-                aria-label="逆時針旋轉 5 度"
+                type="submit"
+                className="w-full py-2.5 bg-amber-700 hover:bg-amber-600 text-white font-bold rounded-lg text-sm transition flex items-center justify-center gap-1.5"
               >
-                <RotateCcw className="h-4 w-4" />
-                -5°
+                <Check className="h-4 w-4" />
+                送出答案
               </button>
-              <p className="text-[11px] text-stone-500 font-mono min-w-[5rem] text-center">
-                {Math.round(angle)}°
-              </p>
-              <button
-                type="button"
-                onClick={() => applyRotationDelta(5)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-stone-900 border border-stone-700 text-stone-300 text-xs font-bold hover:bg-stone-800 active:scale-95 transition touch-manipulation"
-                aria-label="順時針旋轉 5 度"
-              >
-                +5°
-                <RotateCw className="h-4 w-4" />
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-
-      <div className="bg-stone-950 border border-stone-800 rounded-xl p-4 sm:p-5 space-y-4 max-w-xl mx-auto w-full">
-        <h4 className="text-sm font-bold text-stone-200 flex items-center gap-1.5 border-b border-stone-800 pb-2">
-          <MapPin className="h-4 w-4 text-amber-500" />
-          解鎖秘密地點
-        </h4>
-
-        {aligned ? (
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <p className="text-xs text-stone-400">依提示圖上的 A、B、C、D 標記，輸入四個地點全名：</p>
-            {[
-              { label: 'A', value: loc1, set: setLoc1 },
-              { label: 'B', value: loc2, set: setLoc2 },
-              { label: 'C', value: loc3, set: setLoc3 },
-              { label: 'D', value: loc4, set: setLoc4 },
-            ].map((field) => (
-              <div key={field.label} className="space-y-1">
-                <span className="text-[11px] font-mono text-amber-500">{field.label}</span>
-                <input
-                  type="text"
-                  required
-                  placeholder="請輸入地點全名..."
-                  value={field.value}
-                  onChange={(e) => field.set(e.target.value)}
-                  className="w-full border border-stone-800 bg-stone-900 px-3 py-2.5 text-sm text-stone-200 rounded-lg focus:border-amber-500 outline-none"
-                />
-              </div>
-            ))}
-            {error && <p className="text-red-400 text-xs font-semibold">{error}</p>}
-            <button
-              type="submit"
-              className="w-full py-2.5 bg-amber-700 hover:bg-amber-600 text-white font-bold rounded-lg text-sm transition flex items-center justify-center gap-1.5"
-            >
-              <Check className="h-4 w-4" />
-              送出答案
-            </button>
-          </form>
-        ) : (
-          <div className="py-8 text-center text-stone-500 text-xs border border-dashed border-stone-800 rounded-xl">
-            <Compass className="h-6 w-6 mx-auto text-stone-600 mb-2" />
-            <TriangleAlert className="h-4 w-4 inline text-amber-500 mr-1" />
-            請先旋轉紙地圖，讓星標與平板重合
+            </form>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

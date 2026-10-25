@@ -2,25 +2,17 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { audioEngine } from './AudioEngine';
 import { LevelHeader } from './LevelHeader';
+import { NumericKeypad } from './NumericKeypad';
 
 interface FinalPerfectLockProps {
   onSuccess: () => void;
 }
 
-const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '清除', '0', '驗證'];
 const PASSWORD = '0628';
 
 export function FinalPerfectLock({ onSuccess }: FinalPerfectLockProps) {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
-
-  const handleKey = (key: string) => {
-    audioEngine.playBeep(440, 0.08);
-    setError('');
-    if (key === '清除') setCode('');
-    else if (key === '驗證') submit();
-    else if (code.length < 4) setCode((prev) => prev + key);
-  };
 
   const submit = () => {
     if (code === PASSWORD) {
@@ -35,6 +27,14 @@ export function FinalPerfectLock({ onSuccess }: FinalPerfectLockProps) {
     }
   };
 
+  const handleKey = (key: string) => {
+    audioEngine.playBeep(440, 0.08);
+    setError('');
+    if (key === '清除') setCode('');
+    else if (key === '確定') submit();
+    else if (code.length < 4) setCode((prev) => prev + key);
+  };
+
   return (
     <div className="space-y-6 animate-fadeIn">
       <LevelHeader title="完美的人" />
@@ -47,29 +47,23 @@ export function FinalPerfectLock({ onSuccess }: FinalPerfectLockProps) {
         「完美數字是數學界中，全體正因數（除本身外）相加總和等於自身的神秘數字。」
       </blockquote>
 
-      <div className="flex justify-center">
-        <div className="p-5 rounded-2xl bg-stone-950 border-2 border-amber-900/40 w-full max-w-[300px] shadow-2xl mx-auto">
-          <div className="bg-black py-3.5 px-3 rounded-xl border border-rose-950 text-center text-3xl font-mono text-[#f43f5e] font-extrabold tracking-widest min-h-[55px] mb-4 shadow-[inset_0_0_12px_rgba(239,68,68,0.3)] select-all">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div className="rounded-2xl border border-amber-900/40 bg-gradient-to-b from-stone-900 to-black p-6 shadow-2xl min-h-[220px] flex flex-col items-center justify-center text-center space-y-3">
+          <p className="text-[10px] font-mono text-amber-500/80 tracking-[0.35em] uppercase">Perfect Screen</p>
+          <p className="text-3xl font-serif italic text-amber-400">完美的人</p>
+          <p className="text-xs text-stone-400 max-w-xs leading-relaxed">
+            想見到真面目拿到畢業驚喜，請輸入由兩個完美數字組成的生日代碼。
+          </p>
+          <div className="text-4xl font-mono text-[#f43f5e] font-extrabold tracking-[0.35em] min-h-[48px]">
             {code || '----'}
           </div>
-          <div className="grid grid-cols-3 gap-2.5">
-            {KEYS.map((key) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => handleKey(key)}
-                className={`h-11 rounded-lg flex items-center justify-center font-bold tracking-wide transition active:scale-95 ${
-                  key === '驗證'
-                    ? 'bg-amber-600 hover:bg-amber-500 text-stone-950 font-black text-sm shadow-lg shadow-amber-500/20'
-                    : key === '清除'
-                      ? 'bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs'
-                      : 'bg-stone-900 hover:bg-stone-800 border border-stone-800 text-stone-200 text-base'
-                }`}
-              >
-                {key}
-              </button>
-            ))}
+        </div>
+
+        <div className="p-5 rounded-2xl bg-stone-950 border-2 border-amber-900/40 w-full max-w-[320px] mx-auto lg:mx-0 shadow-2xl space-y-4">
+          <div className="bg-black py-3.5 px-3 rounded-xl border border-rose-950 text-center text-3xl font-mono text-[#f43f5e] font-extrabold tracking-widest min-h-[55px] shadow-[inset_0_0_12px_rgba(239,68,68,0.3)]">
+            {code || '----'}
           </div>
+          <NumericKeypad onKey={handleKey} confirmLabel="驗證" />
         </div>
       </div>
 

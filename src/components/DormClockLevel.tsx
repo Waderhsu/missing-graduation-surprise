@@ -84,29 +84,29 @@ export function DormClockLevel({ onSuccess }: DormClockLevelProps) {
         「九年級的每一天，時間總推著我們往固定的方向前進。回憶你最深刻的四個時刻，指針的指向將帶你到下一個地方。」
       </blockquote>
 
-      <ImagePlaceholder
-        src={LEVEL_IMAGES.dormGate}
-        alt="宿舍大門"
-        className="max-w-md mx-auto"
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <ImagePlaceholder
+          src={LEVEL_IMAGES.dormGate}
+          alt="宿舍大門"
+          className="w-full max-w-md mx-auto lg:mx-0"
+        />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-slate-950/40 p-6 rounded-2xl border border-slate-800/60 shadow-xl">
-        <div className="flex flex-col items-center justify-center p-5 bg-slate-900 border border-slate-800 rounded-xl space-y-4">
-          <span className="text-xs text-slate-500 font-mono uppercase tracking-widest leading-none">ENTERED LOCK SEQUENCE</span>
-          <div className="flex gap-4 items-center justify-center min-h-[50px] w-full">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className={`w-12 h-12 rounded-xl flex items-center justify-center border-2 transition-all duration-300 ${sequence[i] ? 'bg-slate-950 border-amber-500 shadow-md shadow-amber-500/20' : 'bg-slate-950/50 border-slate-800'}`}>
-                {sequence[i] ? icon(sequence[i]) : <span className="text-slate-700 font-mono">?</span>}
-              </div>
-            ))}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col items-center justify-center p-5 bg-slate-900 border border-slate-800 rounded-xl space-y-4">
+            <span className="text-xs text-slate-500 font-mono uppercase tracking-widest leading-none">ENTERED LOCK SEQUENCE</span>
+            <div className="flex gap-3 items-center justify-center min-h-[50px] w-full">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className={`w-12 h-12 rounded-xl flex items-center justify-center border-2 transition-all duration-300 ${sequence[i] ? 'bg-slate-950 border-amber-500 shadow-md shadow-amber-500/20' : 'bg-slate-950/50 border-slate-800'}`}>
+                  {sequence[i] ? icon(sequence[i]) : <span className="text-slate-700 font-mono">?</span>}
+                </div>
+              ))}
+            </div>
+            <button type="button" onClick={reset} disabled={sequence.length === 0} className="px-3.5 py-1.5 bg-slate-950 border border-slate-800 text-slate-400 hover:text-slate-200 text-[11px] rounded transition disabled:opacity-50">
+              重置方向
+            </button>
           </div>
-          <button type="button" onClick={reset} disabled={sequence.length === 0} className="px-3.5 py-1.5 bg-slate-950 border border-slate-800 text-slate-400 hover:text-slate-200 text-[11px] rounded transition disabled:opacity-50">
-            重置方向
-          </button>
-        </div>
 
-        <div className="flex flex-col items-center justify-center">
-          <div className="relative w-max p-4 bg-slate-900 border border-slate-800 rounded-2xl shadow-lg">
+          <div className="flex flex-col items-center justify-center p-4 bg-slate-900 border border-slate-800 rounded-2xl shadow-lg">
             <div className="grid grid-cols-3 gap-3">
               <div />
               <button type="button" onClick={() => addDirection('UP')} className="w-14 h-14 bg-slate-950 hover:bg-slate-800 active:scale-95 border border-slate-800 rounded-2xl flex items-center justify-center shadow transition-all hover:border-amber-500/50">{bigIcon('UP')}</button>

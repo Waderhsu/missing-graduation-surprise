@@ -2,18 +2,20 @@ import { useState } from 'react';
 import { audioEngine } from './AudioEngine';
 import { ImagePlaceholder } from './ImagePlaceholder';
 import { LevelHeader } from './LevelHeader';
+import { CharKeyboard } from './CharKeyboard';
 import { LEVEL_IMAGES } from '../levelAssets';
 
 interface LawnDiaryLevelProps {
   onSuccess: () => void;
 }
 
+const CHARS = ['探', '索', '中', '心', '宿', '舍', '體', '育', '館', '藝', '文', '樓'];
+
 export function LawnDiaryLevel({ onSuccess }: LawnDiaryLevelProps) {
   const [answer, setAnswer] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = () => {
     const v = answer.trim();
     if (v === '探索中心') {
       audioEngine.playBeep(987, 0.1);
@@ -36,22 +38,29 @@ export function LawnDiaryLevel({ onSuccess }: LawnDiaryLevelProps) {
         在草皮的一角，你發現了一本被遺忘的日記.........
       </p>
 
-      <ImagePlaceholder src={LEVEL_IMAGES.lawnDiary} alt="小學樓草皮日記" className="max-w-3xl mx-auto" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <ImagePlaceholder src={LEVEL_IMAGES.lawnDiary} alt="小學樓草皮日記" className="w-full max-w-md mx-auto lg:mx-0" />
 
-      <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4 bg-stone-900 border border-stone-800 p-5 rounded-2xl">
-        <span className="text-xs font-mono text-stone-500 uppercase tracking-widest block text-center">🔐 日記指向何處？</span>
-        <input
-          type="text"
-          value={answer}
-          onChange={(e) => { setError(''); setAnswer(e.target.value); }}
-          placeholder="請輸入地點名稱..."
-          className="w-full text-center text-lg py-3 border border-stone-800 bg-stone-950 text-white rounded-xl focus:border-emerald-500 outline-none"
-        />
-        <button type="submit" className="w-full py-3 bg-emerald-700 hover:bg-emerald-600 text-white font-bold rounded-xl text-sm transition">
-          前往該地點
-        </button>
-        {error && <p className="text-red-400 text-xs text-center font-semibold">{error}</p>}
-      </form>
+        <div className="space-y-4 bg-stone-900 border border-stone-800 p-5 rounded-2xl">
+          <span className="text-xs font-mono text-stone-500 uppercase tracking-widest block text-center">🔐 日記指向何處？</span>
+          <div className="w-full text-center text-lg py-3 border border-stone-800 bg-stone-950 text-white rounded-xl min-h-[52px]">
+            {answer || '　'}
+          </div>
+          <CharKeyboard
+            chars={CHARS}
+            onKey={(ch) => {
+              setError('');
+              setAnswer((prev) => prev + ch);
+              audioEngine.playBeep(500, 0.04);
+            }}
+            onBackspace={() => setAnswer((prev) => prev.slice(0, -1))}
+            onClear={() => setAnswer('')}
+            onSubmit={submit}
+            submitLabel="前往該地點"
+          />
+          {error && <p className="text-red-400 text-xs text-center font-semibold">{error}</p>}
+        </div>
+      </div>
     </div>
   );
 }

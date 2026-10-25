@@ -2,18 +2,20 @@ import { useState } from 'react';
 import { audioEngine } from './AudioEngine';
 import { ImagePlaceholder } from './ImagePlaceholder';
 import { LevelHeader } from './LevelHeader';
+import { CharKeyboard } from './CharKeyboard';
 import { LEVEL_IMAGES } from '../levelAssets';
 
 interface BannerBlessingLevelProps {
   onSuccess: () => void;
 }
 
+const CHARS = ['祝', '你', '畢', '業', '快', '樂', '康', '橋', '菁', '英'];
+
 export function BannerBlessingLevel({ onSuccess }: BannerBlessingLevelProps) {
   const [answer, setAnswer] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = () => {
     const v = answer.trim();
     if (v === '祝你畢業快樂') {
       audioEngine.playBeep(987, 0.1);
@@ -37,22 +39,29 @@ export function BannerBlessingLevel({ onSuccess }: BannerBlessingLevelProps) {
         你發現布旗旁邊有一張嫌犯留下的信，內容錯字連篇……仔細閱讀好像是嫌犯留下的線索
       </p>
 
-      <ImagePlaceholder src={LEVEL_IMAGES.banner} alt="康橋菁英活動布旗" className="max-w-5xl mx-auto" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <ImagePlaceholder src={LEVEL_IMAGES.banner} alt="康橋菁英活動布旗" className="w-full max-w-md mx-auto lg:mx-0" />
 
-      <form onSubmit={handleSubmit} className="max-w-sm mx-auto space-y-4 bg-stone-900 border border-stone-800 p-5 rounded-2xl">
-        <span className="text-xs font-mono text-stone-500 uppercase tracking-widest block text-center">請輸入在日記中找到的線索</span>
-        <input
-          type="text"
-          value={answer}
-          onChange={(e) => { setError(''); setAnswer(e.target.value); }}
-          placeholder="請輸入在日記中找到的線索"
-          className="w-full text-center text-xl py-3 border border-stone-800 bg-stone-950 text-white rounded-xl focus:border-sky-500 outline-none"
-        />
-        <button type="submit" className="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl text-sm transition">
-          送出答案
-        </button>
-        {error && <p className="text-red-400 text-xs text-center font-semibold">{error}</p>}
-      </form>
+        <div className="space-y-4 bg-stone-900 border border-stone-800 p-5 rounded-2xl">
+          <span className="text-xs font-mono text-stone-500 uppercase tracking-widest block text-center">請輸入在日記中找到的線索</span>
+          <div className="w-full text-center text-xl py-3 border border-stone-800 bg-stone-950 text-white rounded-xl min-h-[52px]">
+            {answer || '　'}
+          </div>
+          <CharKeyboard
+            chars={CHARS}
+            onKey={(ch) => {
+              setError('');
+              setAnswer((prev) => prev + ch);
+              audioEngine.playBeep(500, 0.04);
+            }}
+            onBackspace={() => setAnswer((prev) => prev.slice(0, -1))}
+            onClear={() => setAnswer('')}
+            onSubmit={submit}
+            submitLabel="送出答案"
+          />
+          {error && <p className="text-red-400 text-xs text-center font-semibold">{error}</p>}
+        </div>
+      </div>
     </div>
   );
 }
