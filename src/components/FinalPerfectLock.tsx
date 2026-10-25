@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { audioEngine } from './AudioEngine';
+import { ImagePlaceholder } from './ImagePlaceholder';
 import { LevelHeader } from './LevelHeader';
 import { NumericKeypad } from './NumericKeypad';
+import { LEVEL_IMAGES } from '../levelAssets';
 
 interface FinalPerfectLockProps {
   onSuccess: () => void;
@@ -48,14 +50,18 @@ export function FinalPerfectLock({ onSuccess }: FinalPerfectLockProps) {
       </blockquote>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <div className="rounded-2xl border border-amber-900/40 bg-gradient-to-b from-stone-900 to-black p-6 shadow-2xl min-h-[220px] flex flex-col items-center justify-center text-center space-y-3">
-          <p className="text-[10px] font-mono text-amber-500/80 tracking-[0.35em] uppercase">Perfect Screen</p>
-          <p className="text-3xl font-serif italic text-amber-400">完美的人</p>
-          <p className="text-xs text-stone-400 max-w-xs leading-relaxed">
-            想見到真面目拿到畢業驚喜，請輸入由兩個完美數字組成的生日代碼。
-          </p>
-          <div className="text-4xl font-mono text-[#f43f5e] font-extrabold tracking-[0.35em] min-h-[48px]">
-            {code || '----'}
+        <div className="space-y-3">
+          <ImagePlaceholder
+            src={LEVEL_IMAGES.perfectScreen}
+            alt="完美的人大螢幕"
+            className="w-full max-w-md mx-auto lg:mx-0"
+          />
+          <div className="rounded-2xl border border-amber-900/40 bg-gradient-to-b from-stone-900 to-black p-5 shadow-2xl text-center space-y-2">
+            <p className="text-[10px] font-mono text-amber-500/80 tracking-[0.35em] uppercase">Gym Main Screen</p>
+            <p className="text-2xl font-serif italic text-amber-400">完美的人</p>
+            <p className="text-xs text-stone-400 leading-relaxed">
+              想見到真面目拿到畢業驚喜，請輸入由兩個完美數字組成的生日代碼。
+            </p>
           </div>
         </div>
 

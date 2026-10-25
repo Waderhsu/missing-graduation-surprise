@@ -447,7 +447,7 @@ export default function App() {
   const activeLevel = LEVELS.find((l) => l.id === state.currentLevelId) || LEVELS[0];
 
   return (
-    <div className="min-h-full bg-[#0a0a0b] text-stone-200 flex flex-col font-sans select-none relative">
+    <div className={`bg-[#0a0a0b] text-stone-200 flex flex-col font-sans select-none relative ${state.currentLevelId === "finish" ? "min-h-screen" : "min-h-full"}`}>
       <div className="fixed top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-amber-950/5 blur-[150px] pointer-events-none -z-10" />
       <div className="fixed bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-stone-950/10 blur-[150px] pointer-events-none -z-10" />
 
@@ -499,7 +499,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className={`flex-1 max-w-5xl w-full mx-auto p-4 md:p-6 z-10 relative ${state.currentLevelId === "finish" ? "pb-6 min-h-[calc(100vh-5.5rem)] flex flex-col" : "pb-24"}`}>
+      <main className={`flex-1 max-w-5xl w-full mx-auto p-4 md:p-6 z-10 relative flex flex-col ${state.currentLevelId === "finish" ? "pb-4 min-h-[calc(100dvh-4.5rem)]" : "pb-24"}`}>
         <AnimatePresence mode="wait">
           <motion.div
             key={state.currentLevelId}
@@ -507,7 +507,7 @@ export default function App() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
             transition={{ duration: 0.4 }}
-            className={`bg-[#121214] border border-stone-800 p-6 md:p-8 rounded-2xl shadow-2xl relative backdrop-blur-md ${state.currentLevelId === "finish" ? "flex-1 flex flex-col justify-center min-h-[calc(100vh-8rem)]" : ""}`}
+            className={`bg-[#121214] border border-stone-800 p-6 md:p-8 rounded-2xl shadow-2xl relative backdrop-blur-md ${state.currentLevelId === "finish" ? "flex-1 flex flex-col justify-center min-h-0" : ""}`}
           >
             {state.currentLevelId === "intro" && (
               <div className="space-y-6 text-center py-6">
@@ -587,7 +587,7 @@ export default function App() {
             {state.currentLevelId === "loc_gym_inner" && <FinalPerfectLock onSuccess={() => advanceToLevel("finish")} />}
 
             {state.currentLevelId === "finish" && (
-              <div className="space-y-6 text-center py-8 md:py-12 flex-1 flex flex-col justify-center">
+              <div className="space-y-6 text-center py-6 md:py-10 flex-1 flex flex-col justify-center w-full">
                 <AnimatePresence mode="wait">
                   {finishStep === 1 && (
                     <motion.div key="f1" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="space-y-8">
@@ -669,7 +669,7 @@ export default function App() {
           </motion.div>
         </AnimatePresence>
 
-        {state.currentLevelId !== "intro" && (
+        {state.currentLevelId !== "intro" && state.currentLevelId !== "finish" && (
           <div className="flex justify-center mt-6 z-0 relative">
             <button onClick={handleResetGame} className="px-4 py-2 border border-stone-800 rounded hover:bg-red-950/20 hover:border-red-500/20 font-bold font-mono text-[11px] text-stone-500 hover:text-red-400 transition">
               🔄 完全清除緩存重置遊戲

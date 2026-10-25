@@ -127,16 +127,16 @@ export function AlarmLockdown({ onSuccess, onFailure }: AlarmLockdownProps) {
 
       <ImagePlaceholder src={LEVEL_IMAGES.alarm} alt="警報系統畫面" className="max-w-lg mx-auto" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
-        <div className="bg-[#0a0f0d] border border-[#22c55e]/25 rounded-xl p-4 sm:p-5 font-mono space-y-4 shadow-inner">
-          <div className="text-[#22c55e] text-center space-y-3">
-            <div className="text-xl sm:text-2xl font-bold tracking-widest">? ? 10 17 26 ?? 50</div>
-          </div>
-          <p className="text-[11px] sm:text-xs leading-relaxed text-amber-200/80 text-left bg-amber-950/20 border border-amber-700/30 rounded-lg p-3">
-            ⚠️系統警告：本機無法讀取超出對照表上限的未知頻率，若遇超載數值，請將其拆解為獨立的單一訊號，再逐一進行轉譯。
-          </p>
+      <div className="bg-[#0a0f0d] border border-[#22c55e]/25 rounded-xl p-4 font-mono shadow-inner space-y-3">
+        <div className="text-[#22c55e] text-center text-xl sm:text-2xl font-bold tracking-widest">
+          ? ? 10 17 26 ?? 50
         </div>
+        <p className="text-[11px] sm:text-xs leading-relaxed text-amber-200/80 bg-amber-950/20 border border-amber-700/30 rounded-lg p-3">
+          ⚠️系統警告：本機無法讀取超出對照表上限的未知頻率，若遇超載數值，請將其拆解為獨立的單一訊號，再逐一進行轉譯。
+        </p>
+      </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
         <div className="flex flex-col gap-4 bg-stone-950 border border-stone-800 rounded-xl p-5">
           <span className="text-xs font-mono text-stone-500 uppercase tracking-widest">
             輸入消音頻率代碼
@@ -144,17 +144,6 @@ export function AlarmLockdown({ onSuccess, onFailure }: AlarmLockdownProps) {
           <div className="w-full py-3.5 border border-stone-700 bg-stone-900 font-mono tracking-[0.45em] text-[#22c55e] rounded-lg text-center text-xl uppercase font-bold min-h-[52px]">
             {answer || '----'}
           </div>
-          <LetterKeyboard
-            onKey={(ch) => {
-              setError('');
-              setAnswer((prev) => (prev.length < 8 ? prev + ch : prev));
-              audioEngine.playBeep(440, 0.05);
-            }}
-            onBackspace={() => setAnswer((prev) => prev.slice(0, -1))}
-            onClear={() => setAnswer('')}
-            onSubmit={submit}
-            submitLabel="中斷警報器"
-          />
           <AnimatePresence>
             {error && (
               <motion.p
@@ -167,6 +156,20 @@ export function AlarmLockdown({ onSuccess, onFailure }: AlarmLockdownProps) {
               </motion.p>
             )}
           </AnimatePresence>
+        </div>
+
+        <div className="bg-stone-950 border border-stone-800 rounded-xl p-4 sm:p-5">
+          <LetterKeyboard
+            onKey={(ch) => {
+              setError('');
+              setAnswer((prev) => (prev.length < 8 ? prev + ch : prev));
+              audioEngine.playBeep(440, 0.05);
+            }}
+            onBackspace={() => setAnswer((prev) => prev.slice(0, -1))}
+            onClear={() => setAnswer('')}
+            onSubmit={submit}
+            submitLabel="中斷警報器"
+          />
         </div>
       </div>
     </div>

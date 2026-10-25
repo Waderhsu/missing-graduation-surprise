@@ -21,7 +21,8 @@
  *  16   | loc_explore_center    | 16-banner.png
  *  17   | loc_intermission4     | 17-location-choice.jpg
  *  18   | loc_gym_outer         | 18-gym-outer-lock.png
- *  19–20| loc_gym_inner, finish | (none)
+ *  19   | loc_gym_inner         | 19-perfect-screen.jpg
+ *  20   | finish                | (none)
  */
 export const LEVEL_IMAGES = {
   gate: `${import.meta.env.BASE_URL}images/levels/02-gate.jpg`,
@@ -42,4 +43,5 @@ export const LEVEL_IMAGES = {
   banner: `${import.meta.env.BASE_URL}images/levels/16-banner.png`,
   locationChoice17: `${import.meta.env.BASE_URL}images/levels/17-location-choice.jpg`,
   gymOuterLock: `${import.meta.env.BASE_URL}images/levels/18-gym-outer-lock.png`,
+  perfectScreen: `${import.meta.env.BASE_URL}images/levels/19-perfect-screen.jpg`,
 } as const;
