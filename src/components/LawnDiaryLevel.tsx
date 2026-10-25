@@ -2,14 +2,12 @@ import { useState } from 'react';
 import { audioEngine } from './AudioEngine';
 import { ImagePlaceholder } from './ImagePlaceholder';
 import { LevelHeader } from './LevelHeader';
-import { CharKeyboard } from './CharKeyboard';
+import { ZhuyinKeyboard } from './ZhuyinKeyboard';
 import { LEVEL_IMAGES } from '../levelAssets';
 
 interface LawnDiaryLevelProps {
   onSuccess: () => void;
 }
-
-const CHARS = ['探', '索', '中', '心', '宿', '舍', '體', '育', '館', '藝', '文', '樓'];
 
 export function LawnDiaryLevel({ onSuccess }: LawnDiaryLevelProps) {
   const [answer, setAnswer] = useState('');
@@ -46,11 +44,10 @@ export function LawnDiaryLevel({ onSuccess }: LawnDiaryLevelProps) {
           <div className="w-full text-center text-lg py-3 border border-stone-800 bg-stone-950 text-white rounded-xl min-h-[52px]">
             {answer || '　'}
           </div>
-          <CharKeyboard
-            chars={CHARS}
-            onKey={(ch) => {
+          <ZhuyinKeyboard
+            onCommit={(text) => {
               setError('');
-              setAnswer((prev) => prev + ch);
+              setAnswer((prev) => prev + text);
               audioEngine.playBeep(500, 0.04);
             }}
             onBackspace={() => setAnswer((prev) => prev.slice(0, -1))}

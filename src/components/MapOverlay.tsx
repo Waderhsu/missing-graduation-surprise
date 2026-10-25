@@ -2,11 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { Check, Compass, MapPin, RotateCcw, RotateCw, TriangleAlert } from 'lucide-react';
 import { audioEngine } from './AudioEngine';
-import { CharKeyboard } from './CharKeyboard';
+import { ZhuyinKeyboard } from './ZhuyinKeyboard';
 import { LevelHeader } from './LevelHeader';
 import { LEVEL_IMAGES } from '../levelAssets';
-
-const PLACE_CHARS = ['宿', '舍', '體', '育', '館', '小', '學', '樓', '藝', '文'];
 
 interface MapOverlayProps {
   onSuccess: () => void;
@@ -264,7 +262,7 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
               解鎖秘密地點
             </h4>
             <form onSubmit={handleSubmit} className="space-y-3">
-              <p className="text-xs text-stone-400">依提示圖 A、B、C、D 點選欄位後用鍵盤輸入：</p>
+              <p className="text-xs text-stone-400">依提示圖 A、B、C、D 點選欄位後用注音鍵盤輸入：</p>
               {([
                 { label: 'A' as const, value: loc1 },
                 { label: 'B' as const, value: loc2 },
@@ -285,11 +283,10 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
                   <span className="text-sm text-stone-200">{field.value || '（點此輸入）'}</span>
                 </button>
               ))}
-              <CharKeyboard
-                chars={PLACE_CHARS}
-                onKey={(ch) => {
+              <ZhuyinKeyboard
+                onCommit={(text) => {
                   setError('');
-                  setFieldValue(fieldValue + ch);
+                  setFieldValue(fieldValue + text);
                   audioEngine.playBeep(500, 0.04);
                 }}
                 onBackspace={() => setFieldValue(fieldValue.slice(0, -1))}

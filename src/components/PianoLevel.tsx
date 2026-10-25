@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { audioEngine } from './AudioEngine';
 import { ImagePlaceholder } from './ImagePlaceholder';
 import { LevelHeader } from './LevelHeader';
-import { CharKeyboard } from './CharKeyboard';
+import { ZhuyinKeyboard } from './ZhuyinKeyboard';
 import { LEVEL_IMAGES } from '../levelAssets';
 
 interface PianoLevelProps {
@@ -12,7 +12,6 @@ interface PianoLevelProps {
 const VALID_ANSWERS = ['小星星', 'twinkle', '小星星歌'];
 const PIANO_KEYS = [1, 2, 3, 4, 5, 6, 7] as const;
 const NOTE_LABELS = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Ti'];
-const CHARS = ['小', '星', '歌', 'T', 'W', 'I', 'N', 'K', 'L', 'E'];
 
 export function PianoLevel({ onSuccess }: PianoLevelProps) {
   const [answer, setAnswer] = useState('');
@@ -84,11 +83,11 @@ export function PianoLevel({ onSuccess }: PianoLevelProps) {
           <div className="w-full text-center font-sans text-xl py-3 border-2 border-slate-700 bg-slate-950 text-white rounded-xl min-h-[52px]">
             {answer || '　'}
           </div>
-          <CharKeyboard
-            chars={CHARS}
-            onKey={(ch) => {
+          <ZhuyinKeyboard
+            enableLatin
+            onCommit={(text) => {
               setError('');
-              setAnswer((prev) => prev + ch);
+              setAnswer((prev) => prev + text);
               audioEngine.playBeep(500, 0.04);
             }}
             onBackspace={() => setAnswer((prev) => prev.slice(0, -1))}

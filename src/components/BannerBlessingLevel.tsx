@@ -2,14 +2,12 @@ import { useState } from 'react';
 import { audioEngine } from './AudioEngine';
 import { ImagePlaceholder } from './ImagePlaceholder';
 import { LevelHeader } from './LevelHeader';
-import { CharKeyboard } from './CharKeyboard';
+import { ZhuyinKeyboard } from './ZhuyinKeyboard';
 import { LEVEL_IMAGES } from '../levelAssets';
 
 interface BannerBlessingLevelProps {
   onSuccess: () => void;
 }
-
-const CHARS = ['祝', '你', '畢', '業', '快', '樂', '康', '橋', '菁', '英'];
 
 export function BannerBlessingLevel({ onSuccess }: BannerBlessingLevelProps) {
   const [answer, setAnswer] = useState('');
@@ -47,11 +45,10 @@ export function BannerBlessingLevel({ onSuccess }: BannerBlessingLevelProps) {
           <div className="w-full text-center text-xl py-3 border border-stone-800 bg-stone-950 text-white rounded-xl min-h-[52px]">
             {answer || '　'}
           </div>
-          <CharKeyboard
-            chars={CHARS}
-            onKey={(ch) => {
+          <ZhuyinKeyboard
+            onCommit={(text) => {
               setError('');
-              setAnswer((prev) => prev + ch);
+              setAnswer((prev) => prev + text);
               audioEngine.playBeep(500, 0.04);
             }}
             onBackspace={() => setAnswer((prev) => prev.slice(0, -1))}
