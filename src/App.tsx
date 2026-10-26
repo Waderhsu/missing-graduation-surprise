@@ -643,12 +643,12 @@ export default function App() {
                   {finishStep === 2 && (
                     <motion.div key="f2" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="space-y-8">
                       <div className="max-w-2xl mx-auto bg-stone-950/80 p-6 md:p-8 rounded-2xl border border-stone-800 text-left space-y-4 shadow-2xl text-stone-300 leading-relaxed text-base">
+                        <p>體育館遠處的暗門緩緩打開，五個黑黑的人影從遠處頂光走來。</p>
                         <img
                           src={LEVEL_IMAGES.teachersSilhouette}
                           alt="從體育館走出的黑黑人影"
                           className="w-full rounded-xl border border-stone-800 object-cover max-h-64"
                         />
-                        <p>體育館遠處的暗門緩緩打開，五個黑黑的人影從遠處頂光走來。</p>
                         <p className="font-bold text-amber-400">沒有看錯！那五個身影逐漸清晰，嫌犯正是九年級的五位數學老師們！</p>
                       </div>
                       <button

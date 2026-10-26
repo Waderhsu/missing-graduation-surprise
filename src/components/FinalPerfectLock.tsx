@@ -49,17 +49,12 @@ export function FinalPerfectLock({ onSuccess }: FinalPerfectLockProps) {
         「完美數字是數學界中，全體正因數（除本身外）相加總和等於自身的神秘數字。」
       </blockquote>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <div className="space-y-3">
-          <ImagePlaceholder
-            src={LEVEL_IMAGES.perfectScreen}
-            alt="完美的人大螢幕"
-            className="w-full max-w-lg mx-auto lg:mx-0"
-          />
-          <p className="text-xs text-stone-400 text-center leading-relaxed px-2">
-            想見到真面目拿到畢業驚喜，請輸入由兩個完美數字組成的生日代碼。
-          </p>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <ImagePlaceholder
+          src={LEVEL_IMAGES.perfectScreen}
+          alt="完美的人大螢幕"
+          className="w-full max-w-lg mx-auto lg:mx-0"
+        />
 
         <div className="p-5 rounded-2xl bg-stone-950 border-2 border-amber-900/40 w-full max-w-[320px] mx-auto lg:mx-0 shadow-2xl space-y-4">
           <div className="bg-black py-3.5 px-3 rounded-xl border border-rose-950 text-center text-3xl font-mono text-[#f43f5e] font-extrabold tracking-widest min-h-[55px] shadow-[inset_0_0_12px_rgba(239,68,68,0.3)]">

@@ -170,9 +170,40 @@ export const ZHUYIN_SYLLABLES: Record<string, string[]> = {
   'ㄇㄟˊ': ['沒', '眉', '梅'],
   'ㄇㄟˇ': ['美', '每'],
   'ㄇㄟˋ': ['妹'],
+
+  // ㄨ + tones (PDF: ㄨˋ showed no candidates)
+  ㄨ: ['烏', '污', '誣'],
+  'ㄨˊ': ['無', '吳', '吾', '梧'],
+  'ㄨˇ': ['五', '武', '舞', '午', '伍'],
+  'ㄨˋ': ['物', '霧', '誤', '務', '悟', '惡'],
+
+  // More common syllables for classroom typing
+  'ㄉㄚˋ': ['大', '代'],
+  ㄉㄚ: ['搭'],
+  'ㄉㄚˊ': ['達', '答'],
+  'ㄉㄚˇ': ['打'],
+  'ㄒㄧㄠ': ['消', '宵', '蕭'],
+  'ㄒㄧㄠˊ': ['消'],
+  'ㄒㄧㄠˋ': ['笑', '校', '孝', '效'],
+  'ㄍㄠ': ['高', '糕'],
+  'ㄍㄠˇ': ['稿', '搞'],
+  'ㄍㄠˋ': ['告'],
+  'ㄉㄧˋ': ['地', '第', '弟', '帝'],
+  ㄉㄧ: ['低'],
+  'ㄉㄧˊ': ['敵', '迪'],
+  'ㄉㄧˇ': ['底', '抵'],
+  'ㄈㄤ': ['方', '芳'],
+  'ㄈㄤˊ': ['房', '防'],
+  'ㄈㄤˇ': ['訪', '仿'],
+  'ㄈㄤˋ': ['放'],
+  'ㄗㄨㄛˋ': ['做', '作', '坐', '座'],
+  ㄗㄨㄛ: ['昨'],
+  'ㄗㄨㄛˇ': ['左'],
 };
 
-/** Multi-syllable phrase shortcuts (composition without spaces). */
+/**
+ * Exact multi-syllable shortcuts only (never prefix-match — that spoils puzzle answers).
+ */
 export const ZHUYIN_PHRASES: Record<string, string[]> = {
   'ㄒㄧㄠˇㄒㄧㄥㄒㄧㄥ': ['小星星'],
   'ㄒㄧㄠˇㄒㄧㄥㄒㄧㄥㄍㄜ': ['小星星歌'],
@@ -187,6 +218,7 @@ export const ZHUYIN_PHRASES: Record<string, string[]> = {
 export function lookupZhuyin(composition: string): string[] {
   if (!composition) return [];
 
+  // Exact phrase only — never show full answers from a partial reading
   const phraseHits = ZHUYIN_PHRASES[composition];
   if (phraseHits?.length) return [...phraseHits];
 
@@ -196,28 +228,18 @@ export function lookupZhuyin(composition: string): string[] {
   const bare = stripTone(composition);
   if (!bare) return [];
 
+  // Incomplete / mid-syllable: do not suggest anything (avoids spoiling)
+  // Only match when bare equals a complete known syllable (tone optional for 一聲)
   const ranked: { score: number; ch: string }[] = [];
   const seen = new Set<string>();
 
-  const push = (ch: string, score: number) => {
-    if (seen.has(ch)) return;
-    seen.add(ch);
-    ranked.push({ ch, score });
-  };
-
-  // Phrase shortcuts only after a reasonably complete reading prefix
-  if (bare.length >= 4) {
-    for (const [key, chars] of Object.entries(ZHUYIN_PHRASES)) {
-      if (key.startsWith(composition) || stripTone(key).startsWith(bare)) {
-        chars.forEach((ch) => push(ch, 0));
-      }
-    }
-  }
-
-  // Syllable: exact tone-stripped match (一聲可不標調)
   for (const [key, chars] of Object.entries(ZHUYIN_SYLLABLES)) {
     if (stripTone(key) === bare) {
-      chars.forEach((ch) => push(ch, key === composition ? 1 : 2));
+      for (const ch of chars) {
+        if (seen.has(ch)) continue;
+        seen.add(ch);
+        ranked.push({ ch, score: key === composition ? 1 : 2 });
+      }
     }
   }
 

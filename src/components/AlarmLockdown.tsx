@@ -129,14 +129,9 @@ export function AlarmLockdown({ onSuccess, onFailure }: AlarmLockdownProps) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-center">
         <div className="space-y-3">
           <ImagePlaceholder src={LEVEL_IMAGES.alarm} alt="警報系統畫面" className="w-full max-w-md mx-auto lg:mx-0" />
-          <div className="bg-[#0a0f0d] border border-[#22c55e]/25 rounded-xl p-3 font-mono shadow-inner space-y-2">
-            <div className="text-[#22c55e] text-center text-lg sm:text-xl font-bold tracking-widest">
-              ? ? 10 17 26 ?? 50
-            </div>
-            <p className="text-[11px] leading-relaxed text-amber-200/80 bg-amber-950/20 border border-amber-700/30 rounded-lg p-2.5">
-              ⚠️系統警告：本機無法讀取超出對照表上限的未知頻率，若遇超載數值，請將其拆解為獨立的單一訊號，再逐一進行轉譯。
-            </p>
-          </div>
+          <p className="text-[11px] leading-relaxed text-amber-200/80 bg-amber-950/20 border border-amber-700/30 rounded-lg p-2.5">
+            ⚠️系統警告：本機無法讀取超出對照表上限的未知頻率，若遇超載數值，請將其拆解為獨立的單一訊號，再逐一進行轉譯。
+          </p>
         </div>
 
         <div className="flex flex-col gap-4">

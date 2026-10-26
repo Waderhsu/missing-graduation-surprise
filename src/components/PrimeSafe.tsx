@@ -52,10 +52,6 @@ export function PrimeSafe({ onSuccess }: PrimeSafeProps) {
         「唯有拆解出最原始的靈魂，並按成長的順序排列，才能開啟。」
       </blockquote>
 
-      <p className="text-center text-amber-400/90 text-sm font-mono tracking-wide">
-        BREAK IT DOWN. BUILD IT BACK.（拆解它，再重新理解它）
-      </p>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-2">
         <div className="flex justify-center items-center">
           <ImagePlaceholder

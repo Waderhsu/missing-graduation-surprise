@@ -36,8 +36,14 @@ export function LawnDiaryLevel({ onSuccess }: LawnDiaryLevelProps) {
         在草皮的一角，你發現了一本被遺忘的日記.........
       </p>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <ImagePlaceholder src={LEVEL_IMAGES.lawnDiary} alt="小學樓草皮日記" className="w-full max-w-md mx-auto lg:mx-0" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+        <div className="flex items-center justify-center">
+          <ImagePlaceholder
+            src={LEVEL_IMAGES.lawnDiary}
+            alt="小學樓草皮日記"
+            className="w-full max-w-xl mx-auto lg:mx-0 scale-105"
+          />
+        </div>
 
         <div className="space-y-4 bg-stone-900 border border-stone-800 p-5 rounded-2xl">
           <span className="text-xs font-mono text-stone-500 uppercase tracking-widest block text-center">🔐 日記指向何處？</span>
