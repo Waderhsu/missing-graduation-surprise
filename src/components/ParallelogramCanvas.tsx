@@ -4,7 +4,7 @@ import { CircleCheck, RotateCcw } from 'lucide-react';
 import { audioEngine } from './AudioEngine';
 import { ImagePlaceholder } from './ImagePlaceholder';
 import { LevelHeader } from './LevelHeader';
-import { LEVEL_IMAGES } from '../levelAssets';
+import { LEVEL_IMAGES, PARA_STAR_POSITIONS, STAR_HANDOFF_KEY } from '../levelAssets';
 
 interface ParallelogramCanvasProps {
   onSuccess: () => void;
@@ -23,7 +23,6 @@ const P2 = { x: 60, y: BOTTOM_Y };
 const P3 = { x: 85, y: BOTTOM_Y };
 const P4 = { x: 60, y: TOP_Y };
 const P5 = { x: 35, y: BOTTOM_Y };
-const P6 = { x: 10, y: BOTTOM_Y };
 
 function getStageConfig(stage: number): StageConfig {
   switch (stage) {
@@ -61,7 +60,12 @@ export function ParallelogramCanvas({ onSuccess }: ParallelogramCanvasProps) {
 
   useEffect(() => {
     if (stage !== 4) return;
-    const t = setTimeout(() => onSuccessRef.current(), 3500);
+    try {
+      sessionStorage.setItem(STAR_HANDOFF_KEY, '1');
+    } catch {
+      /* ignore */
+    }
+    const t = setTimeout(() => onSuccessRef.current(), 2800);
     return () => clearTimeout(t);
   }, [stage]);
 
@@ -178,11 +182,11 @@ export function ParallelogramCanvas({ onSuccess }: ParallelogramCanvasProps) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-center">
         <ImagePlaceholder
           src={LEVEL_IMAGES.tabletEnvelope}
           alt="嫌犯信封與平板"
-          className="w-full max-w-sm mx-auto lg:mx-0"
+          className="w-full max-w-md mx-auto lg:mx-0"
         />
 
         <div className="space-y-3">
@@ -259,20 +263,18 @@ export function ParallelogramCanvas({ onSuccess }: ParallelogramCanvasProps) {
           <AnimatePresence>
             {stage === 4 && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-stone-950/95 flex flex-col items-center justify-center p-6 text-center space-y-4">
-                <div className="grid grid-cols-3 gap-6">
-                {[P1, P2, P3, P4, P5, P6].map((dot, i) => (
+                {PARA_STAR_POSITIONS.map((dot, i) => (
                   <motion.div
                     key={i}
                     initial={{ scale: 0, rotate: -45 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ delay: i * 0.12, type: 'spring' }}
+                    animate={{ scale: [0, 1.25, 1], rotate: 0 }}
+                    transition={{ delay: i * 0.12, type: 'spring', stiffness: 220 }}
                     className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
                     style={{ left: `${dot.x}%`, top: `${dot.y}%` }}
                   >
                     <span className="text-5xl text-amber-300 drop-shadow-[0_0_20px_rgba(251,191,36,1)] animate-pulse">⭐</span>
                   </motion.div>
                 ))}
-                </div>
                 <motion.div initial={{ y: 15, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.9 }} className="space-y-1">
                   <p className="text-[#22c55e] font-bold text-lg flex items-center justify-center gap-1.5">
                     <CircleCheck className="h-5 w-5" /> 完美六星圖騰拼湊成功！

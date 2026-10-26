@@ -31,7 +31,7 @@ export function PianoLevel({ onSuccess }: PianoLevelProps) {
       audioEngine.playBeep(1318, 0.35);
       onSuccess();
     } else {
-      setError('❌ 平板連鎖反饋：『聽覺代號不匹配！這絕非那首純真旋律的名稱！』');
+      setError('密碼錯誤');
       audioEngine.playBeep(220, 0.4);
       setAnswer('');
       setTimeout(() => setError(''), 2200);

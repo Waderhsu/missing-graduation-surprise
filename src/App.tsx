@@ -24,7 +24,7 @@ import { FinalPerfectLock } from "./components/FinalPerfectLock";
 import { GymOuterLock } from "./components/GymOuterLock";
 import { LocationChoiceScreen } from "./components/LocationChoiceScreen";
 import { ItemUnlockDialog } from "./components/ItemUnlockDialog";
-import { LEVEL_IMAGES } from "./levelAssets";
+import { ITEM_IMAGES, LEVEL_IMAGES } from "./levelAssets";
 import { getLevelBgm } from "./levelBgm";
 
 const INITIAL_STATE: GameState = {
@@ -71,7 +71,8 @@ function normalizeSavedState(parsed: Record<string, unknown>): GameState {
 }
 
 export default function App() {
-  const LOCAL_STORAGE_KEY = "消失的畢業驚喜_STATE_V1";
+  /** Bump version to clear stale mid-game saves when sharing the site. */
+  const LOCAL_STORAGE_KEY = "消失的畢業驚喜_STATE_V2";
 
   const [state, setState] = useState<GameState>(() => {
     try {
@@ -417,6 +418,8 @@ export default function App() {
     {
       key: "cookie",
       icon: "🍪",
+      image: ITEM_IMAGES.cookie,
+      spirit: "精神",
       name: "溫熱的餅乾",
       desc: "一塊飄著溫熱香甜烘焙糕底氣味的餅乾。獲得地點宿舍，象徵精神。當你感到疲憊、低潮時，別忘了吃一口，它會給你滿滿的支持與精神鼓勵。",
       unlocked: state.hasCookie,
@@ -424,6 +427,8 @@ export default function App() {
     {
       key: "star",
       icon: "🌌",
+      image: ITEM_IMAGES.postcard,
+      spirit: "美感",
       name: "梵谷《星夜》明信片",
       desc: "一張背面寫著特殊謎字、邊角微微磨損，被撕成一半的明信片。獲得地點藝文館，象徵美感。無論未來有多忙碌，都別忘了留給自己一雙能看見生活中微小美好的眼睛。",
       unlocked: state.hasStarCard,
@@ -431,6 +436,8 @@ export default function App() {
     {
       key: "diary",
       icon: "📖",
+      image: ITEM_IMAGES.diary,
+      spirit: "純真",
       name: "褪色的舊日記本",
       desc: "一本字跡歪歪扭扭、注音還會拼錯的舊日記本。獲得地點小學樓草皮，象徵純真。在未來複雜的世界裡，請時常與自己的內在對話，提醒自己始終保有那顆不被世俗污染、最澄澈純真的心。",
       unlocked: state.hasDiary,
@@ -438,6 +445,8 @@ export default function App() {
     {
       key: "banner",
       icon: "🛡️",
+      image: ITEM_IMAGES.banner,
+      spirit: "勇氣與力量",
       name: "菁英活動布旗",
       desc: "一面帶有特殊弧度的紫色布旗，上面貼著參加過的菁英活動布章。獲得地點探索中心，象徵勇氣與力量。真正的菁英是失敗後還敢勇敢再試一次。帶著這份力量去跨越未來的挑戰吧！",
       unlocked: state.hasBanner,
@@ -605,9 +614,11 @@ export default function App() {
                   {finishStep === 2 && (
                     <motion.div key="f2" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="space-y-8">
                       <div className="max-w-2xl mx-auto bg-stone-950/80 p-6 md:p-8 rounded-2xl border border-stone-800 text-left space-y-4 shadow-2xl text-stone-300 leading-relaxed text-base">
-                        <div className="flex justify-center gap-3 py-4 text-4xl opacity-80" aria-hidden>
-                          <span>👤</span><span>👤</span><span>👤</span><span>👤</span><span>👤</span>
-                        </div>
+                        <img
+                          src={LEVEL_IMAGES.teachersSilhouette}
+                          alt="從體育館走出的黑黑人影"
+                          className="w-full rounded-xl border border-stone-800 object-cover max-h-64"
+                        />
                         <p>體育館遠處的暗門緩緩打開，五個黑黑的人影從遠處頂光走來。</p>
                         <p className="font-bold text-amber-400">沒有看錯！那五個身影逐漸清晰，嫌犯正是九年級的五位數學老師們！</p>
                       </div>
@@ -625,11 +636,11 @@ export default function App() {
                       <div className="max-w-2xl mx-auto bg-stone-950/80 p-6 md:p-8 rounded-2xl border border-stone-800 text-left space-y-4 shadow-2xl text-stone-300 leading-relaxed text-base">
                         <p className="font-bold text-amber-500">「沒錯，這場天羅地網的謎題，就是我們送給你們的畢業禮物。」</p>
                         <p>雖然會考已經結束，但我們在旁看著你們解謎，其實是想在最後帶領你們重新走過這三年的足跡，檢視你們在康橋國中三年，用汗水與挑戰換來的四份重要精神：</p>
-                        <ul className="text-sm space-y-3 list-disc pl-5 text-stone-400">
-                          <li>到了【宿舍】解開鎖頭，代表你們找到了『精神』，那代表面對未來挑戰時，能夠平靜面對與自我修復的能力；</li>
-                          <li>到了【藝文館】透過鏡像看清旋律，代表你們找到了『美感』，那代表生命中不可或缺的藝術與創造力；</li>
-                          <li>到了【小學樓】在草皮上追尋日記，代表你們找到了『純真』，那是無論長多大、走得多遠，都絕對不能忘記的初心與無邪；</li>
-                          <li>最後，到了【探索中心】，找到布旗中的線索，代表你們找到了『勇氣』與『力量』，那是你們這三年不斷蛻變、超越自我的體能證明！</li>
+                        <ul className="text-sm space-y-3 text-stone-400">
+                          <li className="flex gap-2"><span className="text-lg shrink-0" aria-hidden>🍪</span><span>到了【宿舍】解開鎖頭，代表你們找到了『精神』，那代表面對未來挑戰時，能夠平靜面對與自我修復的能力；</span></li>
+                          <li className="flex gap-2"><span className="text-lg shrink-0" aria-hidden>🌌</span><span>到了【藝文館】透過鏡像看清旋律，代表你們找到了『美感』，那代表生命中不可或缺的藝術與創造力；</span></li>
+                          <li className="flex gap-2"><span className="text-lg shrink-0" aria-hidden>📖</span><span>到了【小學樓】在草皮上追尋日記，代表你們找到了『純真』，那是無論長多大、走得多遠，都絕對不能忘記的初心與無邪；</span></li>
+                          <li className="flex gap-2"><span className="text-lg shrink-0" aria-hidden>🛡️</span><span>最後，到了【探索中心】，找到布旗中的線索，代表你們找到了『勇氣』與『力量』，那是你們這三年不斷蛻變、超越自我的體能證明！</span></li>
                         </ul>
                         <p className="text-stone-400 text-sm italic">畢業驚喜從來沒有消失，它早就刻在你們這三年的成長足跡裡。願你們帶著這四份精神，繼續在高中揮灑青春，勇敢圓夢！</p>
                       </div>
@@ -765,8 +776,9 @@ export default function App() {
                     {backpackItems.map((item) => (
                       item.unlocked ? (
                         <div key={item.key} className="p-4 rounded-xl border border-stone-800 bg-stone-900/50 flex gap-4 items-start shadow-md">
-                          <div className="text-3xl p-2.5 rounded-xl border border-stone-800 bg-stone-950">{item.icon}</div>
+                          <img src={item.image} alt={item.name} className="w-14 h-14 object-cover rounded-xl border border-stone-800 bg-stone-950 shrink-0" />
                           <div className="space-y-0.5 min-w-0">
+                            <p className="text-[10px] text-amber-600/90 font-mono">{item.icon} 象徵：{item.spirit}</p>
                             <h4 className="text-sm font-bold font-serif italic text-amber-500">{item.name}</h4>
                             <p className="text-[11px] leading-relaxed text-stone-400">{item.desc}</p>
                           </div>

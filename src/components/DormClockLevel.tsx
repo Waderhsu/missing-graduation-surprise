@@ -32,7 +32,7 @@ export function DormClockLevel({ onSuccess }: DormClockLevelProps) {
           setTimeout(onSuccess, 1000);
         } else {
           audioEngine.playBeep(220, 0.4);
-          setError('❌ 方向鎖孔發出冰冷的警告音：順序不吻合，解鎖失敗！');
+          setError('密碼錯誤');
           setSequence([]);
         }
       }
@@ -84,7 +84,7 @@ export function DormClockLevel({ onSuccess }: DormClockLevelProps) {
         「九年級的每一天，時間總推著我們往固定的方向前進。回憶你最深刻的四個時刻，指針的指向將帶你到下一個地方。」
       </blockquote>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
         <ImagePlaceholder
           src={LEVEL_IMAGES.dormGate}
           alt="宿舍大門"

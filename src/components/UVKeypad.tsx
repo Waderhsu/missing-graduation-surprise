@@ -37,7 +37,7 @@ export function UVKeypad({ onSuccess }: UVKeypadProps) {
       navigator.vibrate?.(100);
       setTimeout(onSuccess, 1200);
     } else {
-      setError('❌ 大門發出沈悶的拒絕警告！密碼錯誤。');
+      setError('密碼錯誤');
       audioEngine.playBeep(220, 0.4);
       navigator.vibrate?.([50, 50, 50]);
       setCode('');

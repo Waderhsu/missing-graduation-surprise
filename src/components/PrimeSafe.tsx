@@ -30,7 +30,7 @@ export function PrimeSafe({ onSuccess }: PrimeSafeProps) {
       audioEngine.playBeep(1318, 0.35);
       onSuccess();
     } else {
-      setError('❌ 保險箱內部發出沈重的鏈條齒輪卡合卡阻聲！密碼錯誤。');
+      setError('密碼錯誤');
       audioEngine.playBeep(220, 0.4);
       setCode('');
       setTimeout(() => setError(''), 2000);
@@ -57,16 +57,16 @@ export function PrimeSafe({ onSuccess }: PrimeSafeProps) {
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center pt-2">
-        <div className="flex justify-center">
+        <div className="flex justify-center items-center">
           <ImagePlaceholder
             src={LEVEL_IMAGES.safe}
             alt="辦公桌上的保險箱"
-            className="w-full max-w-sm mx-auto"
+            className="w-full max-w-md mx-auto scale-105"
           />
         </div>
 
-        <div className="flex flex-col items-center">
-          <div className="p-5 rounded-2xl bg-slate-950/40 border-2 border-slate-700/50 w-full max-w-[280px]">
+        <div className="flex flex-col items-center justify-center">
+          <div className="p-5 rounded-2xl bg-slate-950/60 w-full max-w-[280px]">
             <div className="bg-black py-3.5 px-3 rounded-xl border border-slate-800 text-center text-xl font-mono text-emerald-400 font-extrabold tracking-widest min-h-[48px] mb-4 shadow-[inset_0_0_10px_rgba(0,0,0,0.8)]">
               {code || '-----'}
             </div>

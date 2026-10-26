@@ -21,7 +21,7 @@ export function MirrorWallLevel({ onSuccess }: MirrorWallLevelProps) {
       audioEngine.playBeep(1318, 0.35);
       onSuccess();
     } else {
-      setError('❌ 教室房號不正確！請對著鏡子觀察倒影。');
+      setError('密碼錯誤');
       audioEngine.playBeep(220, 0.4);
       setPassword('');
       setTimeout(() => setError(''), 2200);

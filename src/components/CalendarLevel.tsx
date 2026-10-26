@@ -21,7 +21,7 @@ export function CalendarLevel({ onSuccess }: CalendarLevelProps) {
       audioEngine.playBeep(1318, 0.35);
       onSuccess();
     } else {
-      setError('❌ 暗號不吻合，門把依然卡死不動！');
+      setError('密碼錯誤');
       audioEngine.playBeep(220, 0.4);
       setPassword('');
       setTimeout(() => setError(''), 2000);

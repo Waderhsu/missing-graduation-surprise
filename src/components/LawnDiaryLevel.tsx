@@ -20,7 +20,7 @@ export function LawnDiaryLevel({ onSuccess }: LawnDiaryLevelProps) {
       audioEngine.playBeep(1318, 0.35);
       onSuccess();
     } else {
-      setError('❌ 地點不正確！請仔細閱讀日記中的注音線索。');
+      setError('密碼錯誤');
       audioEngine.playBeep(220, 0.4);
       setAnswer('');
       setTimeout(() => setError(''), 2200);

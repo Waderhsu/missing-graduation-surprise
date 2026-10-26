@@ -21,7 +21,7 @@ export function GymOuterLock({ onSuccess }: GymOuterLockProps) {
       audioEngine.playBeep(1318, 0.35);
       onSuccess();
     } else {
-      setError('❌ 體育館大門的密碼鎖拒絕開啟，請重新解讀三道謎題。');
+      setError('密碼錯誤');
       audioEngine.playBeep(220, 0.4);
       setTimeout(() => setError(''), 2200);
     }

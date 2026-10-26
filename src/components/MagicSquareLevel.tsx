@@ -20,7 +20,7 @@ export function MagicSquareLevel({ onSuccess }: MagicSquareLevelProps) {
       audioEngine.playBeep(1318, 0.35);
       onSuccess();
     } else {
-      setError('❌ 置物櫃密碼鎖嚙合死鎖，解鎖失敗！請再算算看。');
+      setError('密碼錯誤');
       audioEngine.playBeep(220, 0.4);
       setTimeout(() => setError(''), 2200);
     }

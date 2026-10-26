@@ -22,7 +22,7 @@ export function FinalPerfectLock({ onSuccess }: FinalPerfectLockProps) {
       audioEngine.playBeep(1318, 0.35);
       onSuccess();
     } else {
-      setError('❌ 大螢幕傳來低沉報警：『密碼不契和，生日代碼錯誤！完美防禦未解除。』');
+      setError('密碼錯誤');
       audioEngine.playBeep(220, 0.45);
       setCode('');
       setTimeout(() => setError(''), 2200);
@@ -54,15 +54,11 @@ export function FinalPerfectLock({ onSuccess }: FinalPerfectLockProps) {
           <ImagePlaceholder
             src={LEVEL_IMAGES.perfectScreen}
             alt="完美的人大螢幕"
-            className="w-full max-w-md mx-auto lg:mx-0"
+            className="w-full max-w-lg mx-auto lg:mx-0"
           />
-          <div className="rounded-2xl border border-amber-900/40 bg-gradient-to-b from-stone-900 to-black p-5 shadow-2xl text-center space-y-2">
-            <p className="text-[10px] font-mono text-amber-500/80 tracking-[0.35em] uppercase">Gym Main Screen</p>
-            <p className="text-2xl font-serif italic text-amber-400">完美的人</p>
-            <p className="text-xs text-stone-400 leading-relaxed">
-              想見到真面目拿到畢業驚喜，請輸入由兩個完美數字組成的生日代碼。
-            </p>
-          </div>
+          <p className="text-xs text-stone-400 text-center leading-relaxed px-2">
+            想見到真面目拿到畢業驚喜，請輸入由兩個完美數字組成的生日代碼。
+          </p>
         </div>
 
         <div className="p-5 rounded-2xl bg-stone-950 border-2 border-amber-900/40 w-full max-w-[320px] mx-auto lg:mx-0 shadow-2xl space-y-4">

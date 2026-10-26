@@ -4,7 +4,12 @@ import { Check, Compass, MapPin, RotateCcw, RotateCw, TriangleAlert } from 'luci
 import { audioEngine } from './AudioEngine';
 import { ZhuyinKeyboard } from './ZhuyinKeyboard';
 import { LevelHeader } from './LevelHeader';
-import { LEVEL_IMAGES } from '../levelAssets';
+import {
+  LEVEL_IMAGES,
+  PARA_STAR_POSITIONS,
+  STAR_HANDOFF_KEY,
+  TABLET_STAR_POSITIONS,
+} from '../levelAssets';
 
 interface MapOverlayProps {
   onSuccess: () => void;
@@ -26,12 +31,6 @@ const HINT_MARKERS: { label: string; x: number; y: number }[] = [
   { label: 'D', x: 49.5, y: 58 },
 ];
 
-/** Fixed tablet star positions (percent): 2 top, 4 bottom. */
-const TABLET_STARS: [number, number][] = [
-  [63, 47], [75, 63],
-  [31.5, 40], [44, 57], [55.5, 73], [68, 89],
-];
-
 function normalizeAngle(deg: number) {
   return ((deg % 360) + 360) % 360;
 }
@@ -48,6 +47,21 @@ function pointerAngle(clientX: number, clientY: number, rect: DOMRect) {
 }
 
 export function MapOverlay({ onSuccess }: MapOverlayProps) {
+  const [handoff, setHandoff] = useState(() => {
+    try {
+      return sessionStorage.getItem(STAR_HANDOFF_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
+  const [starsSettled, setStarsSettled] = useState(() => {
+    try {
+      return sessionStorage.getItem(STAR_HANDOFF_KEY) !== '1';
+    } catch {
+      return true;
+    }
+  });
+
   const [angle, setAngle] = useState(INITIAL_ANGLE);
   const [aligned, setAligned] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -69,6 +83,22 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
   };
   const dragRef = useRef<{ lastPointerAngle: number } | null>(null);
 
+  useEffect(() => {
+    if (!handoff) return;
+    const t = window.setTimeout(() => {
+      setStarsSettled(true);
+      setHandoff(false);
+      try {
+        sessionStorage.removeItem(STAR_HANDOFF_KEY);
+      } catch {
+        /* ignore */
+      }
+      audioEngine.playBeep(880, 0.12);
+      audioEngine.playBeep(1174, 0.2);
+    }, 1600);
+    return () => window.clearTimeout(t);
+  }, [handoff]);
+
   const applyRotationDelta = useCallback((delta: number) => {
     setAngle((prev) => {
       const next = normalizeAngle(prev + delta);
@@ -82,7 +112,7 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
   }, []);
 
   useEffect(() => {
-    if (aligned || isDragging) return;
+    if (!starsSettled || aligned || isDragging) return;
     if (angularDistance(angle, TARGET_ANGLE) <= TOLERANCE) {
       setAligned(true);
       setAngle(TARGET_ANGLE);
@@ -90,7 +120,7 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
       audioEngine.playBeep(1100, 0.15);
       audioEngine.playBeep(1400, 0.3);
     }
-  }, [angle, aligned, isDragging]);
+  }, [angle, aligned, isDragging, starsSettled]);
 
   useEffect(() => {
     if (!isDragging || aligned) return;
@@ -121,26 +151,24 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
       setIsDragging(false);
     };
 
-    document.addEventListener('pointermove', onMove, { passive: false });
-    document.addEventListener('pointerup', onEnd);
-    document.addEventListener('pointercancel', onEnd);
-
+    window.addEventListener('pointermove', onMove, { passive: false });
+    window.addEventListener('pointerup', onEnd);
+    window.addEventListener('pointercancel', onEnd);
     return () => {
-      document.removeEventListener('pointermove', onMove);
-      document.removeEventListener('pointerup', onEnd);
-      document.removeEventListener('pointercancel', onEnd);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onEnd);
+      window.removeEventListener('pointercancel', onEnd);
     };
   }, [isDragging, aligned]);
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    if (aligned) return;
+    if (aligned || !starsSettled) return;
     e.preventDefault();
-    const rect = e.currentTarget.getBoundingClientRect();
+    const rect = rotateRef.current?.getBoundingClientRect();
+    if (!rect) return;
     dragRef.current = { lastPointerAngle: pointerAngle(e.clientX, e.clientY, rect) };
     setIsDragging(true);
-    if (e.currentTarget.setPointerCapture) {
-      e.currentTarget.setPointerCapture(e.pointerId);
-    }
+    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -158,10 +186,12 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
       onSuccess();
     } else {
       audioEngine.playBeep(220, 0.45, 'triangle');
-      setError(`❌ 有地標名稱填寫錯誤！`);
-      setTimeout(() => setError(''), 3500);
+      setError('密碼錯誤');
+      setTimeout(() => setError(''), 2200);
     }
   };
+
+  const showPuzzle = starsSettled && !aligned;
 
   return (
     <div className="space-y-5">
@@ -174,62 +204,95 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
         如果這兩顆星代表已經破解的地方，那麼平板上剩下的四顆星，一定就是嫌犯藏匿線索的地點！
       </blockquote>
 
-      {!aligned && (
+      {(handoff || showPuzzle) && (
         <div className="flex flex-col items-center gap-3">
-          <span className="text-xs text-stone-400 text-center">
-            🎯 在圓形區域拖曳旋轉紙地圖，或使用下方按鈕微調
-          </span>
+          {handoff && (
+            <p className="text-xs text-amber-400/90 text-center animate-pulse">
+              ✨ 六星圖騰正對應到平板星圖…
+            </p>
+          )}
+          {!handoff && (
+            <span className="text-xs text-stone-400 text-center">
+              🎯 六星圖騰固定不動；拖曳／微調旋轉半透明「兩星地圖」，疊合到六星上
+            </span>
+          )}
           <div
             ref={rotateRef}
             onPointerDown={handlePointerDown}
-            className="relative w-full max-w-[min(480px,85vw)] aspect-square rounded-full border-4 border-stone-800 overflow-hidden shadow-2xl touch-none select-none bg-[#070b10] cursor-grab active:cursor-grabbing"
+            className={`relative w-full max-w-[min(480px,85vw)] aspect-square rounded-full border-4 border-stone-800 overflow-hidden shadow-2xl select-none bg-[#070b10] ${
+              handoff ? 'cursor-default' : 'touch-none cursor-grab active:cursor-grabbing'
+            }`}
             style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none' }}
           >
-            <div className="absolute inset-0">
-              <div className="absolute inset-0 pointer-events-none z-10">
-                {TABLET_STARS.map(([x, y], i) => (
-                  <span
-                    key={`bg-${i}`}
-                    className="absolute text-xl -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_0_8px_rgba(250,204,21,0.9)]"
-                    style={{ left: `${x}%`, top: `${y}%` }}
+            {/* Fixed six-star totem */}
+            <div className="absolute inset-0 pointer-events-none z-20">
+              {TABLET_STAR_POSITIONS.map((target, i) => {
+                const from = PARA_STAR_POSITIONS[i];
+                return (
+                  <motion.span
+                    key={`star-${i}`}
+                    className="absolute text-2xl -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_0_12px_rgba(250,204,21,1)]"
+                    initial={
+                      handoff
+                        ? { left: `${from.x}%`, top: `${from.y}%`, scale: 1.35, rotate: -25 }
+                        : { left: `${target.x}%`, top: `${target.y}%`, scale: 1, rotate: 0 }
+                    }
+                    animate={{ left: `${target.x}%`, top: `${target.y}%`, scale: 1, rotate: 0 }}
+                    transition={{
+                      duration: handoff ? 1.25 : 0,
+                      delay: handoff ? i * 0.08 : 0,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
                   >
                     ⭐
-                  </span>
-                ))}
-              </div>
-              <motion.div
-                animate={{ rotate: angle }}
-                transition={isDragging ? { duration: 0 } : { type: 'spring', damping: 24, stiffness: 200 }}
-                className="absolute inset-0 origin-center scale-120 pointer-events-none"
-              >
-                <img
-                  src={STAR_MAP}
-                  alt="校園紙地圖"
-                  draggable={false}
-                  className="absolute inset-0 w-full h-full object-contain opacity-[0.48] pointer-events-none"
-                />
-              </motion.div>
+                  </motion.span>
+                );
+              })}
             </div>
+
+            {/* Rotatable 2-star transparent map — fades in after handoff */}
+            <motion.div
+              className="absolute inset-0 origin-center scale-120 pointer-events-none z-10"
+              initial={{ opacity: handoff ? 0 : 1 }}
+              animate={{ opacity: starsSettled ? 1 : 0, rotate: angle }}
+              transition={
+                isDragging
+                  ? { rotate: { duration: 0 }, opacity: { duration: 0.45 } }
+                  : { type: 'spring', damping: 24, stiffness: 200, opacity: { duration: 0.45 } }
+              }
+            >
+              <img
+                src={STAR_MAP}
+                alt="兩星透明校園地圖"
+                draggable={false}
+                className="absolute inset-0 w-full h-full object-contain opacity-[0.55] pointer-events-none"
+              />
+            </motion.div>
           </div>
-          <div className="flex items-center gap-3">
-            <button type="button" onClick={() => applyRotationDelta(-5)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-stone-900 border border-stone-700 text-stone-300 text-xs font-bold hover:bg-stone-800 active:scale-95 transition touch-manipulation">
-              <RotateCcw className="h-4 w-4" /> -5°
-            </button>
-            <p className="text-[11px] text-stone-500 font-mono min-w-[5rem] text-center">{Math.round(angle)}°</p>
-            <button type="button" onClick={() => applyRotationDelta(5)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-stone-900 border border-stone-700 text-stone-300 text-xs font-bold hover:bg-stone-800 active:scale-95 transition touch-manipulation">
-              +5° <RotateCw className="h-4 w-4" />
-            </button>
-          </div>
-          <div className="w-full max-w-xl py-8 text-center text-stone-500 text-xs border border-dashed border-stone-800 rounded-xl">
-            <Compass className="h-6 w-6 mx-auto text-stone-600 mb-2" />
-            <TriangleAlert className="h-4 w-4 inline text-amber-500 mr-1" />
-            請先旋轉紙地圖，讓星標與平板重合
-          </div>
+
+          {starsSettled && !aligned && (
+            <>
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={() => applyRotationDelta(-5)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-stone-900 border border-stone-700 text-stone-300 text-xs font-bold hover:bg-stone-800 active:scale-95 transition touch-manipulation">
+                  <RotateCcw className="h-4 w-4" /> -5°
+                </button>
+                <p className="text-[11px] text-stone-500 font-mono min-w-[5rem] text-center">{Math.round(angle)}°</p>
+                <button type="button" onClick={() => applyRotationDelta(5)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-stone-900 border border-stone-700 text-stone-300 text-xs font-bold hover:bg-stone-800 active:scale-95 transition touch-manipulation">
+                  +5° <RotateCw className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="w-full max-w-xl py-6 text-center text-stone-500 text-xs border border-dashed border-stone-800 rounded-xl">
+                <Compass className="h-6 w-6 mx-auto text-stone-600 mb-2" />
+                <TriangleAlert className="h-4 w-4 inline text-amber-500 mr-1" />
+                請旋轉紙地圖，讓兩顆星與平板六星圖騰重合
+              </div>
+            </>
+          )}
         </div>
       )}
 
       {aligned && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-center">
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -292,7 +355,7 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
                 onBackspace={() => setFieldValue(fieldValue.slice(0, -1))}
                 onClear={() => setFieldValue('')}
               />
-              {error && <p className="text-red-400 text-xs font-semibold">{error}</p>}
+              {error && <p className="text-red-400 text-xs font-semibold text-center">{error}</p>}
               <button
                 type="submit"
                 className="w-full py-2.5 bg-amber-700 hover:bg-amber-600 text-white font-bold rounded-lg text-sm transition flex items-center justify-center gap-1.5"
