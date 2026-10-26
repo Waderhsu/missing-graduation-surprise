@@ -53,5 +53,3 @@ export const TABLET_STAR_POSITIONS: { x: number; y: number }[] = [
   { x: 55.5, y: 73 },
   { x: 68, y: 89 },
 ];
-
-export const STAR_HANDOFF_KEY = 'escape-star-handoff-v1';

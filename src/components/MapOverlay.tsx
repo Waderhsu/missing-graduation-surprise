@@ -1,18 +1,18 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import { Check, Compass, MapPin, RotateCcw, RotateCw, TriangleAlert } from 'lucide-react';
 import { audioEngine } from './AudioEngine';
 import { ZhuyinKeyboard } from './ZhuyinKeyboard';
 import { LevelHeader } from './LevelHeader';
-import {
-  LEVEL_IMAGES,
-  PARA_STAR_POSITIONS,
-  STAR_HANDOFF_KEY,
-  TABLET_STAR_POSITIONS,
-} from '../levelAssets';
+import type { StarPoint } from './StarFlightOverlay';
+import { LEVEL_IMAGES, TABLET_STAR_POSITIONS } from '../levelAssets';
 
 interface MapOverlayProps {
   onSuccess: () => void;
+  /** True while App-level star flight overlay is running. */
+  starFlightActive?: boolean;
+  /** Report tablet star screen targets so the overlay can fly into place. */
+  onStarTargetsReady?: (targets: StarPoint[]) => void;
 }
 
 const STAR_MAP = LEVEL_IMAGES.starMap;
@@ -46,21 +46,13 @@ function pointerAngle(clientX: number, clientY: number, rect: DOMRect) {
   return normalizeAngle(Math.atan2(clientY - cy, clientX - cx) * (180 / Math.PI));
 }
 
-export function MapOverlay({ onSuccess }: MapOverlayProps) {
-  const [handoff, setHandoff] = useState(() => {
-    try {
-      return sessionStorage.getItem(STAR_HANDOFF_KEY) === '1';
-    } catch {
-      return false;
-    }
-  });
-  const [starsSettled, setStarsSettled] = useState(() => {
-    try {
-      return sessionStorage.getItem(STAR_HANDOFF_KEY) !== '1';
-    } catch {
-      return true;
-    }
-  });
+export function MapOverlay({
+  onSuccess,
+  starFlightActive = false,
+  onStarTargetsReady,
+}: MapOverlayProps) {
+  const [starsSettled, setStarsSettled] = useState(!starFlightActive);
+  const reportedTargets = useRef(false);
 
   const [angle, setAngle] = useState(INITIAL_ANGLE);
   const [aligned, setAligned] = useState(false);
@@ -73,6 +65,8 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
   const [error, setError] = useState('');
 
   const rotateRef = useRef<HTMLDivElement>(null);
+  const onTargetsReadyRef = useRef(onStarTargetsReady);
+  onTargetsReadyRef.current = onStarTargetsReady;
 
   const fieldValue = activeField === 'A' ? loc1 : activeField === 'B' ? loc2 : activeField === 'C' ? loc3 : loc4;
   const setFieldValue = (v: string) => {
@@ -83,21 +77,42 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
   };
   const dragRef = useRef<{ lastPointerAngle: number } | null>(null);
 
+  // Measure destination star positions on the circle after layout.
+  useLayoutEffect(() => {
+    if (!starFlightActive || reportedTargets.current) return;
+    const measure = () => {
+      const el = rotateRef.current;
+      if (!el) return false;
+      const rect = el.getBoundingClientRect();
+      if (rect.width < 40 || rect.height < 40) return false;
+      reportedTargets.current = true;
+      onTargetsReadyRef.current?.(
+        TABLET_STAR_POSITIONS.map((p) => ({
+          x: rect.left + (p.x / 100) * rect.width,
+          y: rect.top + (p.y / 100) * rect.height,
+        })),
+      );
+      return true;
+    };
+    if (measure()) return;
+    const id = window.requestAnimationFrame(() => {
+      measure();
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [starFlightActive]);
+
+  // When App clears the flight overlay, settle local puzzle UI.
   useEffect(() => {
-    if (!handoff) return;
-    const t = window.setTimeout(() => {
+    if (starFlightActive) {
+      setStarsSettled(false);
+      return;
+    }
+    if (!starsSettled) {
       setStarsSettled(true);
-      setHandoff(false);
-      try {
-        sessionStorage.removeItem(STAR_HANDOFF_KEY);
-      } catch {
-        /* ignore */
-      }
       audioEngine.playBeep(880, 0.12);
-      audioEngine.playBeep(1174, 0.2);
-    }, 1600);
-    return () => window.clearTimeout(t);
-  }, [handoff]);
+      audioEngine.playBeep(1174, 0.22);
+    }
+  }, [starFlightActive, starsSettled]);
 
   const applyRotationDelta = useCallback((delta: number) => {
     setAngle((prev) => {
@@ -112,7 +127,7 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
   }, []);
 
   useEffect(() => {
-    if (!starsSettled || aligned || isDragging) return;
+    if (!starsSettled || aligned || isDragging || starFlightActive) return;
     if (angularDistance(angle, TARGET_ANGLE) <= TOLERANCE) {
       setAligned(true);
       setAngle(TARGET_ANGLE);
@@ -120,7 +135,7 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
       audioEngine.playBeep(1100, 0.15);
       audioEngine.playBeep(1400, 0.3);
     }
-  }, [angle, aligned, isDragging, starsSettled]);
+  }, [angle, aligned, isDragging, starsSettled, starFlightActive]);
 
   useEffect(() => {
     if (!isDragging || aligned) return;
@@ -162,7 +177,7 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
   }, [isDragging, aligned]);
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    if (aligned || !starsSettled) return;
+    if (aligned || !starsSettled || starFlightActive) return;
     e.preventDefault();
     const rect = rotateRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -191,7 +206,8 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
     }
   };
 
-  const showPuzzle = starsSettled && !aligned;
+  const showCircle = !aligned;
+  const showPuzzleControls = starsSettled && !aligned && !starFlightActive;
 
   return (
     <div className="space-y-5">
@@ -204,14 +220,11 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
         如果這兩顆星代表已經破解的地方，那麼平板上剩下的四顆星，一定就是嫌犯藏匿線索的地點！
       </blockquote>
 
-      {(handoff || showPuzzle) && (
+      {showCircle && (
         <div className="flex flex-col items-center gap-3">
-          {handoff && (
-            <p className="text-xs text-amber-400/90 text-center animate-pulse">
-              ✨ 六星圖騰正對應到平板星圖…
-            </p>
-          )}
-          {!handoff && (
+          {starFlightActive ? (
+            <p className="text-xs text-amber-400/90 text-center animate-pulse">✨ 六星圖騰飛向平板星位…</p>
+          ) : (
             <span className="text-xs text-stone-400 text-center">
               🎯 六星圖騰固定不動；拖曳／微調旋轉半透明「兩星地圖」，疊合到六星上
             </span>
@@ -220,41 +233,31 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
             ref={rotateRef}
             onPointerDown={handlePointerDown}
             className={`relative w-full max-w-[min(480px,85vw)] aspect-square rounded-full border-4 border-stone-800 overflow-hidden shadow-2xl select-none bg-[#070b10] ${
-              handoff ? 'cursor-default' : 'touch-none cursor-grab active:cursor-grabbing'
+              starFlightActive ? 'cursor-default' : 'touch-none cursor-grab active:cursor-grabbing'
             }`}
             style={{ WebkitTouchCallout: 'none', WebkitUserSelect: 'none' }}
           >
-            {/* Fixed six-star totem */}
-            <div className="absolute inset-0 pointer-events-none z-20">
-              {TABLET_STAR_POSITIONS.map((target, i) => {
-                const from = PARA_STAR_POSITIONS[i];
-                return (
-                  <motion.span
-                    key={`star-${i}`}
-                    className="absolute text-2xl -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_0_12px_rgba(250,204,21,1)]"
-                    initial={
-                      handoff
-                        ? { left: `${from.x}%`, top: `${from.y}%`, scale: 1.35, rotate: -25 }
-                        : { left: `${target.x}%`, top: `${target.y}%`, scale: 1, rotate: 0 }
-                    }
-                    animate={{ left: `${target.x}%`, top: `${target.y}%`, scale: 1, rotate: 0 }}
-                    transition={{
-                      duration: handoff ? 1.25 : 0,
-                      delay: handoff ? i * 0.08 : 0,
-                      ease: [0.22, 1, 0.36, 1],
-                    }}
-                  >
-                    ⭐
-                  </motion.span>
-                );
-              })}
+            {/* Settled six-star totem (hidden while flying overlay is active) */}
+            <div
+              className={`absolute inset-0 pointer-events-none z-20 transition-opacity duration-300 ${
+                starFlightActive ? 'opacity-0' : 'opacity-100'
+              }`}
+            >
+              {TABLET_STAR_POSITIONS.map((target, i) => (
+                <span
+                  key={`star-${i}`}
+                  className="absolute text-2xl -translate-x-1/2 -translate-y-1/2 drop-shadow-[0_0_12px_rgba(250,204,21,1)]"
+                  style={{ left: `${target.x}%`, top: `${target.y}%` }}
+                >
+                  ⭐
+                </span>
+              ))}
             </div>
 
-            {/* Rotatable 2-star transparent map — fades in after handoff */}
             <motion.div
               className="absolute inset-0 origin-center scale-120 pointer-events-none z-10"
-              initial={{ opacity: handoff ? 0 : 1 }}
-              animate={{ opacity: starsSettled ? 1 : 0, rotate: angle }}
+              initial={false}
+              animate={{ opacity: starsSettled && !starFlightActive ? 1 : 0, rotate: angle }}
               transition={
                 isDragging
                   ? { rotate: { duration: 0 }, opacity: { duration: 0.45 } }
@@ -270,7 +273,7 @@ export function MapOverlay({ onSuccess }: MapOverlayProps) {
             </motion.div>
           </div>
 
-          {starsSettled && !aligned && (
+          {showPuzzleControls && (
             <>
               <div className="flex items-center gap-3">
                 <button type="button" onClick={() => applyRotationDelta(-5)} className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-stone-900 border border-stone-700 text-stone-300 text-xs font-bold hover:bg-stone-800 active:scale-95 transition touch-manipulation">

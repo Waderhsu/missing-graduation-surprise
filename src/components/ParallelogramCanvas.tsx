@@ -4,10 +4,12 @@ import { CircleCheck, RotateCcw } from 'lucide-react';
 import { audioEngine } from './AudioEngine';
 import { ImagePlaceholder } from './ImagePlaceholder';
 import { LevelHeader } from './LevelHeader';
-import { LEVEL_IMAGES, PARA_STAR_POSITIONS, STAR_HANDOFF_KEY } from '../levelAssets';
+import { LEVEL_IMAGES, PARA_STAR_POSITIONS } from '../levelAssets';
+import type { StarPoint } from './StarFlightOverlay';
 
 interface ParallelogramCanvasProps {
-  onSuccess: () => void;
+  /** Called with star screen centers so the next level can fly them into place. */
+  onSuccess: (starScreenPoints?: StarPoint[]) => void;
 }
 
 type StageConfig = {
@@ -60,13 +62,28 @@ export function ParallelogramCanvas({ onSuccess }: ParallelogramCanvasProps) {
 
   useEffect(() => {
     if (stage !== 4) return;
-    try {
-      sessionStorage.setItem(STAR_HANDOFF_KEY, '1');
-    } catch {
-      /* ignore */
-    }
-    const t = setTimeout(() => onSuccessRef.current(), 2800);
-    return () => clearTimeout(t);
+    // Wait for star pop-in, then capture screen coords and hand off continuously.
+    const t = window.setTimeout(() => {
+      const nodes = canvasRef.current?.querySelectorAll<HTMLElement>('[data-para-star]');
+      const points: StarPoint[] = [];
+      nodes?.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        points.push({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+      });
+      // Prefer DOM order; fall back to percent→canvas mapping if needed
+      if (points.length < PARA_STAR_POSITIONS.length && canvasRef.current) {
+        const rect = canvasRef.current.getBoundingClientRect();
+        points.length = 0;
+        PARA_STAR_POSITIONS.forEach((p) => {
+          points.push({
+            x: rect.left + (p.x / 100) * rect.width,
+            y: rect.top + (p.y / 100) * rect.height,
+          });
+        });
+      }
+      onSuccessRef.current(points);
+    }, 2000);
+    return () => window.clearTimeout(t);
   }, [stage]);
 
   const reset = () => {
@@ -266,6 +283,7 @@ export function ParallelogramCanvas({ onSuccess }: ParallelogramCanvasProps) {
                 {PARA_STAR_POSITIONS.map((dot, i) => (
                   <motion.div
                     key={i}
+                    data-para-star
                     initial={{ scale: 0, rotate: -45 }}
                     animate={{ scale: [0, 1.25, 1], rotate: 0 }}
                     transition={{ delay: i * 0.12, type: 'spring', stiffness: 220 }}
@@ -275,11 +293,11 @@ export function ParallelogramCanvas({ onSuccess }: ParallelogramCanvasProps) {
                     <span className="text-5xl text-amber-300 drop-shadow-[0_0_20px_rgba(251,191,36,1)] animate-pulse">⭐</span>
                   </motion.div>
                 ))}
-                <motion.div initial={{ y: 15, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.9 }} className="space-y-1">
+                <motion.div initial={{ y: 15, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.9 }} className="space-y-1 relative z-20">
                   <p className="text-[#22c55e] font-bold text-lg flex items-center justify-center gap-1.5">
                     <CircleCheck className="h-5 w-5" /> 完美六星圖騰拼湊成功！
                   </p>
-                  <p className="text-[10px] text-stone-500 font-mono">TABLET COMPATIBLE_LOCK UNLOCKED</p>
+                  <p className="text-[10px] text-stone-500 font-mono">即將對應至平板星圖…</p>
                 </motion.div>
               </motion.div>
             )}

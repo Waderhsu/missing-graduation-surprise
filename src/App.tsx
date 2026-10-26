@@ -26,6 +26,7 @@ import { LocationChoiceScreen } from "./components/LocationChoiceScreen";
 import { ItemUnlockDialog } from "./components/ItemUnlockDialog";
 import { ITEM_IMAGES, LEVEL_IMAGES } from "./levelAssets";
 import { getLevelBgm } from "./levelBgm";
+import { StarFlightOverlay, type StarPoint } from "./components/StarFlightOverlay";
 
 const INITIAL_STATE: GameState = {
   currentLevelId: "intro",
@@ -98,6 +99,8 @@ export default function App() {
   }, [state]);
 
   const [bgAmbient, setBgAmbient] = useState<boolean>(true);
+  /** Continuous star flight: hold at `from`, then fly to `to` once MapOverlay measures targets. */
+  const [starFlight, setStarFlight] = useState<{ from: StarPoint[]; to: StarPoint[] | null } | null>(null);
   const [mapOpen, setMapOpen] = useState<boolean>(false);
   const [backpackTab, setBackpackTab] = useState<"items" | "progress">("items");
   const [showResetConfirm, setShowResetConfirm] = useState<boolean>(false);
@@ -464,6 +467,15 @@ export default function App() {
         <canvas ref={canvasRef} className="fixed inset-0 w-full h-full pointer-events-none z-50 bg-transparent" />
       )}
 
+      {starFlight && (
+        <StarFlightOverlay
+          from={starFlight.from}
+          to={starFlight.to}
+          onComplete={() => setStarFlight(null)}
+          duration={2.4}
+        />
+      )}
+
       <header className="sticky top-0 z-40 bg-[#121214]/95 backdrop-blur-xl border-b border-stone-800 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3 shadow-lg">
         <div className="flex items-center gap-3 min-w-0">
           <div className="h-10 w-10 shrink-0 rounded bg-stone-900 border border-stone-800 flex items-center justify-center text-xl shadow-md">🕵️‍♂️</div>
@@ -540,8 +552,25 @@ export default function App() {
             )}
             {state.currentLevelId === "loc_office_door" && <CalendarLevel onSuccess={() => advanceToLevel("loc_safe")} />}
             {state.currentLevelId === "loc_safe" && <PrimeSafe onSuccess={() => advanceToLevel("loc_tablet")} />}
-            {state.currentLevelId === "loc_tablet" && <ParallelogramCanvas onSuccess={() => advanceToLevel("loc_star_map")} />}
-            {state.currentLevelId === "loc_star_map" && <MapOverlay onSuccess={() => advanceToLevel("loc_intermission1")} />}
+            {state.currentLevelId === "loc_tablet" && (
+              <ParallelogramCanvas
+                onSuccess={(points) => {
+                  if (points && points.length >= 6) {
+                    setStarFlight({ from: points, to: null });
+                  }
+                  advanceToLevel("loc_star_map");
+                }}
+              />
+            )}
+            {state.currentLevelId === "loc_star_map" && (
+              <MapOverlay
+                starFlightActive={!!starFlight}
+                onStarTargetsReady={(targets) => {
+                  setStarFlight((prev) => (prev ? { ...prev, to: targets } : null));
+                }}
+                onSuccess={() => advanceToLevel("loc_intermission1")}
+              />
+            )}
 
             {state.currentLevelId === "loc_intermission1" && (
               <LocationChoiceScreen
